@@ -1,228 +1,880 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IBFS Admission Portal 2026</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f4f7fb;
-}
-
-.container{
-  max-width:500px;
-  margin:60px auto;
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
-}
-
-h2{
-  text-align:center;
-  color:#1e3a8a;
-}
-
-input{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  border:1px solid #ccc;
-  border-radius:8px;
-}
-
-button{
-  width:100%;
-  padding:12px;
-  margin-top:15px;
-  border:none;
-  border-radius:8px;
-  background:#1e3a8a;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.message{
-  margin-top:10px;
-  padding:10px;
-  border-radius:8px;
-  display:none;
-}
-
-.success{
-  background:#d1fae5;
-  color:#065f46;
-}
-
-.error{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-img{
-  width:100%;
-  margin-top:10px;
-  border-radius:10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBFS Admission Dashboard</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --primary:#1e3a8a;
+      --primary2:#2563eb;
+      --green:#16a34a;
+      --pink:#ec4899;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#dbe3ef;
+      --danger:#b91c1c;
+      --dangerBg:#fee2e2;
+      --success:#166534;
+      --successBg:#dcfce7;
+      --shadow:0 10px 30px rgba(15,23,42,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .container{
+      max-width:980px;
+      margin:auto;
+      padding:14px;
+    }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-top:12px;
+    }
+    .header{
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;
+      padding:20px;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      margin-bottom:12px;
+    }
+    .header h1{
+      margin:0;
+      font-size:24px;
+      line-height:1.3;
+    }
+    .header p{
+      margin:8px 0 0;
+      opacity:.9;
+      font-size:14px;
+    }
+    h3{
+      margin:0 0 12px;
+      color:var(--primary);
+    }
+    .top{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .stat{
+      flex:1;
+      min-width:120px;
+      text-align:center;
+      padding:16px;
+      border-radius:12px;
+      color:white;
+      font-weight:bold;
+      box-shadow:var(--shadow);
+    }
+    .total{background:var(--primary)}
+    .male{background:var(--green)}
+    .female{background:var(--pink)}
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-top:10px;
+    }
+    .full{grid-column:1 / -1}
+    label{
+      font-size:14px;
+      font-weight:600;
+      color:#374151;
+    }
+    input,select,button{
+      font:inherit;
+    }
+    input,select{
+      width:100%;
+      padding:12px 13px;
+      border-radius:10px;
+      border:1px solid #cfd8e3;
+      background:#fff;
+      outline:none;
+    }
+    input:focus,select:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(59,130,246,.12);
+    }
+    input[readonly]{
+      background:#f8fafc;
+      color:#475569;
+    }
+    button{
+      padding:12px 14px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-secondary{background:#e5e7eb;color:#111827}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-warning{background:#f59e0b;color:#fff}
+    .btn-danger{background:#dc2626;color:#fff}
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .actions button{flex:1}
+    .message{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:10px;
+      display:none;
+      font-weight:600;
+    }
+    .message.show{display:block}
+    .message.success{
+      background:var(--successBg);
+      color:var(--success);
+    }
+    .message.error{
+      background:var(--dangerBg);
+      color:var(--danger);
+    }
+    .message.info{
+      background:#dbeafe;
+      color:#1d4ed8;
+    }
+    .student{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:#fff;
+      padding:12px;
+      margin-top:10px;
+      border-radius:12px;
+      box-shadow:0 5px 15px rgba(0,0,0,.05);
+      border:1px solid #eef2f7;
+    }
+    .student img{
+      width:68px;
+      height:88px;
+      object-fit:cover;
+      border-radius:8px;
+      background:#f3f4f6;
+      border:1px solid #e5e7eb;
+      flex-shrink:0;
+    }
+    .student-info{
+      flex:1;
+      min-width:0;
+      font-size:14px;
+      line-height:1.5;
+    }
+    .student-info b{
+      display:block;
+      font-size:16px;
+      color:#111827;
+    }
+    .student-actions{
+      width:150px;
+      flex-shrink:0;
+    }
+    .hidden{display:none !important}
+    .preview{
+      width:120px;
+      height:150px;
+      object-fit:cover;
+      border-radius:10px;
+      border:1px solid #dbe3ef;
+      background:#f8fafc;
+      display:none;
+      margin-top:10px;
+    }
+    .note{
+      color:var(--muted);
+      font-size:13px;
+      margin-top:6px;
+    }
+    .pill{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      background:#eef4ff;
+      color:var(--primary);
+      font-weight:700;
+      font-size:13px;
+    }
+    @media (max-width:700px){
+      .row{grid-template-columns:1fr}
+      .student{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+      .student-actions{
+        width:100%;
+      }
+      .actions{
+        flex-direction:column;
+      }
+      .actions button{
+        width:100%;
+      }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="container" id="loginBox">
-  <h2>Login</h2>
-  <div id="loginMsg" class="message"></div>
-  <input id="username" placeholder="Username">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-</div>
+<div class="container">
+  <div class="header">
+    <h1>Indus Bright Future School System</h1>
+    <p>Admission Dashboard 2026</p>
+  </div>
 
-<div class="container" id="appBox" style="display:none;">
-  <h2>Admission Form</h2>
+  <!-- LOGIN -->
+  <div id="loginBox" class="card">
+    <h3>School Login</h3>
+    <div class="row">
+      <div class="field">
+        <label for="username">User Name</label>
+        <input id="username" placeholder="Enter username">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter password">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-primary" onclick="login()">Login</button>
+    </div>
+    <div id="loginMsg" class="message"></div>
+  </div>
 
-  <div id="appMsg" class="message"></div>
+  <!-- APP -->
+  <div id="app" class="hidden">
+    <div class="card">
+      <div class="actions" style="margin-top:0">
+        <span class="pill">Logged in School: <span id="schoolBadge"></span></span>
+        <button class="btn-success" onclick="showNewAdmission()">+ New Admission</button>
+        <button class="btn-secondary" onclick="showDashboard()">Dashboard</button>
+        <button class="btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </div>
 
-  <input id="schoolCode" readonly>
-  <input id="grNo" placeholder="GR No">
-  <input id="studentName" placeholder="Student Name">
-  <input id="fatherName" placeholder="Father Name">
-  <input id="parentContact" placeholder="Mobile">
+    <!-- DASHBOARD -->
+    <div id="dashboardBox">
+      <div class="top">
+        <div class="stat total">Total<br><span id="total">0</span></div>
+        <div class="stat male">Male<br><span id="male">0</span></div>
+        <div class="stat female">Female<br><span id="female">0</span></div>
+      </div>
 
-  <input type="file" id="photo">
+      <div class="card">
+        <h3>Students</h3>
+        <input id="search" placeholder="Search by Name / GR No" oninput="filterStudents()">
+        <div class="note">Tap “Manage Record” to open full record in edit mode.</div>
+        <div id="list"></div>
+      </div>
+    </div>
 
-  <img id="preview" style="display:none;">
+    <!-- FORM -->
+    <div id="formBox" class="card hidden">
+      <h3 id="formTitle">New Admission</h3>
 
-  <button onclick="save()">Save</button>
-  <button onclick="search()">Search</button>
+      <div id="appMsg" class="message"></div>
+
+      <input type="hidden" id="mode" value="create">
+      <input type="hidden" id="originalSchoolCode">
+      <input type="hidden" id="originalGrNo">
+      <input type="hidden" id="existingPhotoUrl">
+
+      <div class="row">
+        <div class="field">
+          <label for="schoolCode">School Code</label>
+          <input id="schoolCode" readonly>
+        </div>
+        <div class="field">
+          <label for="grNo">GR No</label>
+          <input id="grNo" inputmode="numeric">
+        </div>
+
+        <div class="field">
+          <label for="studentName">Student Name</label>
+          <input id="studentName">
+        </div>
+        <div class="field">
+          <label for="surnameCast">Surname / Cast</label>
+          <input id="surnameCast">
+        </div>
+
+        <div class="field">
+          <label for="gender">Gender</label>
+          <select id="gender">
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="date">
+        </div>
+
+        <div class="field">
+          <label for="birthPlace">Birth Place</label>
+          <input id="birthPlace">
+        </div>
+        <div class="field">
+          <label for="religion">Religion</label>
+          <input id="religion">
+        </div>
+
+        <div class="field">
+          <label for="admitClass">Admit in Class</label>
+          <select id="admitClass">
+            <option value="">Select Class</option>
+            <option>Kachi</option>
+            <option>I</option>
+            <option>II</option>
+            <option>III</option>
+            <option>IV</option>
+            <option>V</option>
+            <option>VI</option>
+            <option>VII</option>
+            <option>VIII</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="currentClass">Current Class</label>
+          <select id="currentClass">
+            <option value="">Select Class</option>
+            <option>Kachi</option>
+            <option>I</option>
+            <option>II</option>
+            <option>III</option>
+            <option>IV</option>
+            <option>V</option>
+            <option>VI</option>
+            <option>VII</option>
+            <option>VIII</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="dateOfAdmission">Date of Admission</label>
+          <input id="dateOfAdmission" type="date">
+        </div>
+        <div class="field">
+          <label for="shift">Shift</label>
+          <select id="shift">
+            <option value="">Select Shift</option>
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="bFormNo">B Form No</label>
+          <input id="bFormNo" inputmode="numeric" maxlength="13">
+        </div>
+        <div class="field">
+          <label for="fatherName">Father Name</label>
+          <input id="fatherName">
+        </div>
+
+        <div class="field">
+          <label for="fatherCnic">Father CNIC No</label>
+          <input id="fatherCnic" inputmode="numeric" maxlength="13">
+        </div>
+        <div class="field">
+          <label for="motherName">Mother Name</label>
+          <input id="motherName">
+        </div>
+
+        <div class="field">
+          <label for="motherCnic">Mother CNIC No</label>
+          <input id="motherCnic" inputmode="numeric" maxlength="13">
+        </div>
+        <div class="field">
+          <label for="parentsCnic">Parents CNIC No</label>
+          <input id="parentsCnic" inputmode="numeric" maxlength="13">
+        </div>
+
+        <div class="field">
+          <label for="parentContact">Parent Contact Number</label>
+          <input id="parentContact" inputmode="numeric" maxlength="11">
+        </div>
+
+        <div class="field full">
+          <label for="photo">Student Photo</label>
+          <input type="file" id="photo" accept="image/*">
+          <div class="note">Required in new admission. Optional in update mode.</div>
+          <img id="preview" class="preview">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="saveBtn" class="btn-success" onclick="save()">Submit Admission</button>
+        <button id="updateBtn" class="btn-warning hidden" onclick="updateRecord()">Update Record</button>
+        <button class="btn-secondary" onclick="backToDashboard()">Back</button>
+        <button class="btn-secondary" onclick="resetForm()">Reset Form</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzkja68kzTrywDKPXwlIXpLnlTqI9fGO9IaEtMqpTzfhEBwYypO-6CUArDJ7GACUE-QFg/exec";
+const API = "https://script.google.com/macros/s/AKfycbzkja68kzTrywDKPXwlIXpLnlTqI9fGO9IaEtMqpTzfhEBwYypO-6CUArDJ7GACUE-QFg/exec";
 
 let schoolCode = "";
+let students = [];
 let base64 = "";
 
+function byId(id){ return document.getElementById(id); }
+
 function showMsg(id,type,text){
-  let el=document.getElementById(id);
-  el.style.display="block";
-  el.className="message "+type;
-  el.innerText=text;
+  const el = byId(id);
+  el.className = "message show " + type;
+  el.innerText = text;
 }
 
 function hideMsg(id){
-  let el=document.getElementById(id);
-  el.style.display="none";
+  const el = byId(id);
+  el.className = "message";
+  el.innerText = "";
 }
 
-function login(){
+function digitsOnly(v){
+  return String(v || "").replace(/\D/g,"");
+}
+
+function extractDriveFileId(url){
+  if(!url) return "";
+  let m = String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  m = String(url).match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return m[1];
+  return "";
+}
+
+function toPreviewImageUrl(url){
+  if(!url) return "";
+  const fileId = extractDriveFileId(url);
+  if(!fileId) return url;
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+}
+
+async function postData(payload){
+  const res = await fetch(API,{
+    method:"POST",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(payload)
+  });
+  return await res.json();
+}
+
+async function login(){
   hideMsg("loginMsg");
 
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
+  const username = byId("username").value.trim();
+  const password = byId("password").value.trim();
+
+  if(!username || !password){
+    showMsg("loginMsg","error","User Name ۽ Password ڀريو.");
+    return;
+  }
+
+  try{
+    const d = await postData({
       action:"login",
-      username:username.value,
-      password:password.value
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
+      username,
+      password
+    });
+
     if(!d.success){
-      showMsg("loginMsg","error",d.message);
+      showMsg("loginMsg","error",d.message || "Login failed");
       return;
     }
 
-    schoolCode=d.schoolCode;
+    schoolCode = String(d.schoolCode || "").trim();
 
-    loginBox.style.display="none";
-    appBox.style.display="block";
+    byId("schoolBadge").innerText = schoolCode;
+    byId("schoolCode").value = schoolCode;
 
-    document.getElementById("schoolCode").value=schoolCode;
+    byId("loginBox").classList.add("hidden");
+    byId("app").classList.remove("hidden");
 
-  })
-  .catch(e=>{
+    showDashboard();
+    await loadDashboard();
+
+  }catch(e){
     showMsg("loginMsg","error","Backend error / Deploy issue");
+  }
+}
+
+function logout(){
+  schoolCode = "";
+  students = [];
+  base64 = "";
+  byId("username").value = "";
+  byId("password").value = "";
+  byId("loginBox").classList.remove("hidden");
+  byId("app").classList.add("hidden");
+  byId("dashboardBox").classList.remove("hidden");
+  byId("formBox").classList.add("hidden");
+  hideMsg("loginMsg");
+  hideMsg("appMsg");
+}
+
+async function loadDashboard(){
+  // جيڪڏهن backend ۾ dashboard action نه هجي ته fallback search list نٿو هلي سگهي،
+  // تنهنڪري هتي try/catch رکيو آهي.
+  try{
+    const d = await postData({
+      action:"dashboard",
+      schoolCode
+    });
+
+    if(!d.success){
+      byId("total").innerText = "0";
+      byId("male").innerText = "0";
+      byId("female").innerText = "0";
+      students = [];
+      render(students);
+      return;
+    }
+
+    students = d.students || [];
+    byId("total").innerText = d.total || 0;
+    byId("male").innerText = d.male || 0;
+    byId("female").innerText = d.female || 0;
+    render(students);
+  }catch(e){
+    byId("total").innerText = "0";
+    byId("male").innerText = "0";
+    byId("female").innerText = "0";
+    students = [];
+    render(students);
+  }
+}
+
+function render(data){
+  const container = byId("list");
+  container.innerHTML = "";
+
+  if(!data.length){
+    container.innerHTML = `<div class="card" style="margin-top:10px;">No records found.</div>`;
+    return;
+  }
+
+  data.forEach(s=>{
+    const photo = s.photo ? toPreviewImageUrl(s.photo) : "";
+    const div = document.createElement("div");
+    div.className = "student";
+
+    div.innerHTML = `
+      <img src="${photo}" onerror="this.src='';this.style.background='#f3f4f6'">
+      <div class="student-info">
+        <b>${s.name || ""}</b>
+        Father: ${s.father || ""}<br>
+        GR No: ${s.grNo || ""}<br>
+        Class: ${s.class || ""}
+      </div>
+      <div class="student-actions">
+        <button class="btn-primary" onclick="manageRecord('${String(s.grNo || "").replace(/'/g,"\\'")}')">Manage Record</button>
+      </div>
+    `;
+    container.appendChild(div);
   });
 }
 
-photo.onchange=async(e)=>{
-  let file=e.target.files[0];
-  let reader=new FileReader();
-  reader.onload=()=>{
-    base64=reader.result;
-    preview.src=base64;
-    preview.style.display="block";
+function filterStudents(){
+  const q = byId("search").value.toLowerCase().trim();
+  const f = students.filter(s =>
+    String(s.name || "").toLowerCase().includes(q) ||
+    String(s.grNo || "").includes(q)
+  );
+  render(f);
+}
+
+function showDashboard(){
+  byId("dashboardBox").classList.remove("hidden");
+  byId("formBox").classList.add("hidden");
+  hideMsg("appMsg");
+}
+
+function showNewAdmission(){
+  resetForm();
+  byId("mode").value = "create";
+  byId("formTitle").innerText = "New Admission";
+  byId("saveBtn").classList.remove("hidden");
+  byId("updateBtn").classList.add("hidden");
+  byId("dashboardBox").classList.add("hidden");
+  byId("formBox").classList.remove("hidden");
+  byId("schoolCode").value = schoolCode;
+}
+
+function backToDashboard(){
+  byId("formBox").classList.add("hidden");
+  byId("dashboardBox").classList.remove("hidden");
+  hideMsg("appMsg");
+}
+
+function resetForm(){
+  base64 = "";
+  byId("grNo").value = "";
+  byId("studentName").value = "";
+  byId("surnameCast").value = "";
+  byId("bFormNo").value = "";
+  byId("fatherName").value = "";
+  byId("fatherCnic").value = "";
+  byId("motherName").value = "";
+  byId("motherCnic").value = "";
+  byId("gender").value = "";
+  byId("dob").value = "";
+  byId("admitClass").value = "";
+  byId("parentsCnic").value = "";
+  byId("currentClass").value = "";
+  byId("religion").value = "";
+  byId("birthPlace").value = "";
+  byId("parentContact").value = "";
+  byId("dateOfAdmission").value = "";
+  byId("shift").value = "";
+  byId("photo").value = "";
+  byId("preview").src = "";
+  byId("preview").style.display = "none";
+  byId("originalSchoolCode").value = "";
+  byId("originalGrNo").value = "";
+  byId("existingPhotoUrl").value = "";
+  byId("schoolCode").value = schoolCode;
+  hideMsg("appMsg");
+}
+
+byId("photo").onchange = e => {
+  let file = e.target.files[0];
+  if(!file){
+    base64 = "";
+    byId("preview").style.display = "none";
+    byId("preview").src = "";
+    return;
+  }
+
+  let reader = new FileReader();
+  reader.onload = () => {
+    base64 = reader.result;
+    byId("preview").src = base64;
+    byId("preview").style.display = "block";
   };
   reader.readAsDataURL(file);
 };
 
-function save(){
-  hideMsg("appMsg");
+function fillForm(r){
+  byId("schoolCode").value = r.schoolCode || schoolCode;
+  byId("grNo").value = r.grNo || "";
+  byId("studentName").value = r.studentName || "";
+  byId("surnameCast").value = r.surnameCast || "";
+  byId("bFormNo").value = r.bFormNo || "";
+  byId("fatherName").value = r.fatherName || "";
+  byId("fatherCnic").value = r.fatherCnic || "";
+  byId("motherName").value = r.motherName || "";
+  byId("motherCnic").value = r.motherCnic || "";
+  byId("gender").value = r.gender || "";
+  byId("dob").value = r.dob || "";
+  byId("admitClass").value = r.admitClass || "";
+  byId("parentsCnic").value = r.parentsCnic || "";
+  byId("currentClass").value = r.currentClass || "";
+  byId("religion").value = r.religion || "";
+  byId("birthPlace").value = r.birthPlace || "";
+  byId("parentContact").value = r.parentContact || "";
+  byId("dateOfAdmission").value = r.dateOfAdmission || "";
+  byId("shift").value = r.shift || "";
 
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
-      action:"create",
-      schoolCode,
-      grNo:grNo.value,
-      studentName:studentName.value,
-      fatherName:fatherName.value,
-      parentContact:parentContact.value,
-      studentPhotoBase64:base64
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
-    if(!d.success){
-      showMsg("appMsg","error",d.message);
-      return;
-    }
+  byId("originalSchoolCode").value = r.schoolCode || "";
+  byId("originalGrNo").value = r.grNo || "";
+  byId("existingPhotoUrl").value = r.studentPhoto || "";
+  base64 = "";
 
-    showMsg("appMsg","success","Saved Successfully");
-
-    setTimeout(()=>{
-      grNo.value="";
-      studentName.value="";
-      fatherName.value="";
-      parentContact.value="";
-      preview.style.display="none";
-    },1500);
-  });
+  if(r.studentPhoto){
+    byId("preview").src = toPreviewImageUrl(r.studentPhoto);
+    byId("preview").style.display = "block";
+    byId("preview").onerror = function(){
+      const fileId = extractDriveFileId(r.studentPhoto);
+      if(fileId){
+        this.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
+      }
+    };
+  }else{
+    byId("preview").src = "";
+    byId("preview").style.display = "none";
+  }
 }
 
-function search(){
-  fetch(API_URL,{
-    method:"POST",
-    body:JSON.stringify({
+async function manageRecord(grNo){
+  hideMsg("appMsg");
+
+  try{
+    const d = await postData({
       action:"search",
       schoolCode,
-      grNo:grNo.value
-    })
-  })
-  .then(r=>r.json())
-  .then(d=>{
+      grNo
+    });
+
     if(!d.success){
-      showMsg("appMsg","error","Record not found");
+      showMsg("appMsg","error",d.message || "Record not found");
+      byId("dashboardBox").classList.add("hidden");
+      byId("formBox").classList.remove("hidden");
       return;
     }
 
-    let r=d.record;
+    fillForm(d.record);
 
-    studentName.value=r.studentName;
-    fatherName.value=r.fatherName;
-    parentContact.value=r.parentContact;
+    byId("mode").value = "update";
+    byId("formTitle").innerText = "Manage Record";
+    byId("saveBtn").classList.add("hidden");
+    byId("updateBtn").classList.remove("hidden");
 
-    if(r.studentPhoto){
-      preview.src=r.studentPhoto;
-      preview.style.display="block";
+    byId("dashboardBox").classList.add("hidden");
+    byId("formBox").classList.remove("hidden");
+
+    showMsg("appMsg","success","Record loaded successfully.");
+  }catch(e){
+    showMsg("appMsg","error","Search error");
+  }
+}
+
+function validateForm(isUpdate=false){
+  if(!digitsOnly(byId("grNo").value)) return "GR No is required.";
+  if(!byId("studentName").value.trim()) return "Student Name is required.";
+  if(!byId("surnameCast").value.trim()) return "Surname / Cast is required.";
+  if(!byId("gender").value) return "Gender is required.";
+  if(!byId("dob").value) return "Date of Birth is required.";
+  if(!byId("birthPlace").value.trim()) return "Birth Place is required.";
+  if(!byId("religion").value.trim()) return "Religion is required.";
+  if(!byId("admitClass").value) return "Admit in Class is required.";
+  if(!byId("currentClass").value) return "Current Class is required.";
+  if(!byId("dateOfAdmission").value) return "Date of Admission is required.";
+  if(!byId("shift").value) return "Shift is required.";
+
+  if(!/^\d{13}$/.test(digitsOnly(byId("bFormNo").value))) return "B Form No must be exactly 13 digits.";
+  if(!byId("fatherName").value.trim()) return "Father Name is required.";
+  if(!/^\d{13}$/.test(digitsOnly(byId("fatherCnic").value))) return "Father CNIC No must be exactly 13 digits.";
+  if(!byId("motherName").value.trim()) return "Mother Name is required.";
+  if(!/^\d{13}$/.test(digitsOnly(byId("motherCnic").value))) return "Mother CNIC No must be exactly 13 digits.";
+  if(!/^\d{13}$/.test(digitsOnly(byId("parentsCnic").value))) return "Parents CNIC No must be exactly 13 digits.";
+  if(!/^\d{11}$/.test(digitsOnly(byId("parentContact").value))) return "Parent Contact Number must be exactly 11 digits.";
+
+  if(!isUpdate && !base64) return "Student photo is required.";
+
+  return "";
+}
+
+function collectPayload(action){
+  return {
+    action,
+    schoolCode,
+    grNo: digitsOnly(byId("grNo").value),
+    studentName: byId("studentName").value.trim(),
+    surnameCast: byId("surnameCast").value.trim(),
+    bFormNo: digitsOnly(byId("bFormNo").value),
+    fatherName: byId("fatherName").value.trim(),
+    fatherCnic: digitsOnly(byId("fatherCnic").value),
+    motherName: byId("motherName").value.trim(),
+    motherCnic: digitsOnly(byId("motherCnic").value),
+    gender: byId("gender").value,
+    dob: byId("dob").value,
+    admitClass: byId("admitClass").value,
+    parentsCnic: digitsOnly(byId("parentsCnic").value),
+    currentClass: byId("currentClass").value,
+    religion: byId("religion").value.trim(),
+    birthPlace: byId("birthPlace").value.trim(),
+    parentContact: digitsOnly(byId("parentContact").value),
+    dateOfAdmission: byId("dateOfAdmission").value,
+    shift: byId("shift").value,
+    studentPhotoBase64: base64,
+    existingPhotoUrl: byId("existingPhotoUrl").value,
+    originalSchoolCode: byId("originalSchoolCode").value,
+    originalGrNo: byId("originalGrNo").value
+  };
+}
+
+async function save(){
+  hideMsg("appMsg");
+
+  const error = validateForm(false);
+  if(error){
+    showMsg("appMsg","error",error);
+    return;
+  }
+
+  try{
+    const d = await postData(collectPayload("create"));
+
+    if(!d.success){
+      showMsg("appMsg","error",d.message || "Save failed");
+      return;
     }
 
-    showMsg("appMsg","success","Record Found");
-  });
+    showMsg("appMsg","success",d.message || "Admission submitted successfully.");
+
+    setTimeout(async ()=>{
+      backToDashboard();
+      await loadDashboard();
+      resetForm();
+      hideMsg("appMsg");
+    }, 1500);
+
+  }catch(e){
+    showMsg("appMsg","error","Submit error");
+  }
+}
+
+async function updateRecord(){
+  hideMsg("appMsg");
+
+  const error = validateForm(true);
+  if(error){
+    showMsg("appMsg","error",error);
+    return;
+  }
+
+  try{
+    const d = await postData(collectPayload("update"));
+
+    if(!d.success){
+      showMsg("appMsg","error",d.message || "Update failed");
+      return;
+    }
+
+    if(d.studentPhoto){
+      byId("existingPhotoUrl").value = d.studentPhoto;
+      byId("preview").src = toPreviewImageUrl(d.studentPhoto);
+      byId("preview").style.display = "block";
+    }
+
+    showMsg("appMsg","success",d.message || "Record updated successfully.");
+
+    setTimeout(async ()=>{
+      backToDashboard();
+      await loadDashboard();
+      resetForm();
+      hideMsg("appMsg");
+    }, 1500);
+
+  }catch(e){
+    showMsg("appMsg","error","Update error");
+  }
 }
 </script>
 
