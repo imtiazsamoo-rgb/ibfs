@@ -963,21 +963,39 @@
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
     }
 
-    async function downloadSchoolPdf(){
-      const schoolCode = (loggedInSchoolCode || '').trim();
-      if(!schoolCode){ showStatus('No school is logged in.','error'); return; }
+   async function downloadSchoolPdf(){
+  const schoolCode = (loggedInSchoolCode || '').trim();
+  if(!schoolCode){
+    showStatus('No school is logged in.','error');
+    return;
+  }
 
-      try{
-        showStatus('Preparing PDF...','info');
-        const result = await postToScript({ action:'downloadpdf', schoolCode });
-        if(!result.success) throw new Error(result.message || 'PDF generation failed.');
-        if(!result.downloadUrl) throw new Error('PDF download link was not returned.');
-        await triggerFileDownload(result.downloadUrl, result.fileName || ('School_' + schoolCode + '_Students.pdf'));
-        showStatus('PDF download started.','success');
-      }catch(error){
-        showStatus(error.message || 'PDF download failed.','error');
-      }
+  try{
+    showStatus('Preparing PDF...','info');
+
+    const result = await postToScript({
+      action:'downloadpdf',
+      schoolCode
+    });
+
+    if(!result.success){
+      throw new Error(result.message || 'PDF generation failed.');
     }
+
+    // ✅ direct download without popup
+    const link = document.createElement('a');
+    link.href = result.downloadUrl;
+    link.download = 'students.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showStatus('PDF downloaded successfully.','success');
+
+  }catch(error){
+    showStatus(error.message || 'PDF download failed.','error');
+  }
+}
 
     function renderDashboardStudents(list){
       const safeList = Array.isArray(list) ? list : [];
