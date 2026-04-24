@@ -1,1341 +1,507 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IBFS Admission Pro 2026</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" />
-  <style>
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:#f5f7fb;
-      color:#1f2937;
-    }
-    .container{
-      max-width:1080px;
-      margin:0 auto;
-      padding:14px;
-    }
-    .card{
-      background:#fff;
-      border-radius:18px;
-      box-shadow:0 10px 24px rgba(15,23,42,.08);
-      overflow:hidden;
-    }
-    .header{
-      padding:20px;
-      background:linear-gradient(135deg,#1d4ed8,#2563eb);
-      color:#fff;
-    }
-    .header h1{
-      margin:0;
-      font-size:24px;
-      font-family:Arial,sans-serif;
-    }
-    .header p{
-      margin:8px 0 0;
-      opacity:.92;
-      font-size:14px;
-    }
-    .panel{
-      padding:16px 18px;
-      border-bottom:1px solid #eef2f7;
-    }
-    .box{
-      background:#f8fafc;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      padding:16px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-    }
-    .grid.two{
-      grid-template-columns:1fr;
-    }
-    .field{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    label{
-      font-size:14px;
-      font-weight:600;
-      color:#374151;
-    }
-    input,select,button{
-      font:inherit;
-    }
-    input,select{
-      width:100%;
-      padding:12px 13px;
-      border:1px solid #d1d5db;
-      border-radius:12px;
-      outline:none;
-      background:#fff;
-      font-size:16px;
-    }
-    input[readonly]{
-      background:#f9fafb;
-    }
-    input:focus,select:focus{
-      border-color:#2563eb;
-      box-shadow:0 0 0 4px rgba(37,99,235,.12);
-    }
-    .field-error{
-      border-color:#dc2626 !important;
-      box-shadow:0 0 0 4px rgba(220,38,38,.12) !important;
-    }
-    .inline-error{
-      font-size:12px;
-      color:#b91c1c;
-      margin-top:4px;
-      font-weight:600;
-    }
-    .section-title{
-      font-size:14px;
-      font-weight:700;
-      color:#111827;
-      margin:0 0 2px;
-    }
-    .actions{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:16px;
-    }
-    .btn{
-      border:none;
-      padding:12px 16px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:600;
-    }
-    .btn-primary{background:#2563eb;color:#fff}
-    .btn-secondary{background:#e5e7eb;color:#111827}
-    .btn-success{background:#16a34a;color:#fff}
-    .btn-warning{background:#f59e0b;color:#fff}
-    .btn-danger{background:#dc2626;color:#fff}
-    .status{
-      margin-top:16px;
-      padding:14px 16px;
-      border-radius:12px;
-      display:none;
-      font-weight:500;
-    }
-    .status.show{display:block}
-    .status.info{background:#dbeafe;color:#1d4ed8}
-    .status.success{background:#dcfce7;color:#166534}
-    .status.error{background:#fee2e2;color:#991b1b}
-    .note{
-      font-size:13px;
-      color:#6b7280;
-      margin-top:6px;
-    }
-    .hidden{display:none !important}
-    .school-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      background:#eef4ff;
-      color:#1e3a8a;
-      border:1px solid #d9e6ff;
-      padding:10px 14px;
-      border-radius:999px;
-      font-size:14px;
-      font-weight:700;
-    }
-    .badge{
-      display:inline-block;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-      background:#e5e7eb;
-      color:#374151;
-      align-self:center;
-    }
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:14px;
-    }
-    .stat-card{
-      border-radius:16px;
-      padding:18px;
-      color:white;
-      box-shadow:0 10px 22px rgba(15,23,42,.08);
-    }
-    .stat-card.total{background:linear-gradient(135deg,#1e3a8a,#2563eb)}
-    .stat-card.male{background:linear-gradient(135deg,#15803d,#16a34a)}
-    .stat-card.female{background:linear-gradient(135deg,#be185d,#ec4899)}
-    .stat-card .label{
-      font-size:13px;
-      opacity:.9;
-      margin-bottom:8px;
-      font-weight:600;
-    }
-    .stat-card .value{
-      font-size:30px;
-      font-weight:800;
-      line-height:1;
-    }
-    .student-list{margin-top:14px}
-    .offline-box{margin-top:16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:16px;padding:14px}
-    .offline-row{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #fed7aa;padding-top:10px;margin-top:10px;font-size:13px}
-    .offline-ok{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
-    .offline-bad{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
-    .student-card{
-      background:white;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      padding:14px;
-      display:grid;
-      grid-template-columns:84px 1fr 170px;
-      gap:14px;
-      align-items:center;
-      margin-top:12px;
-      box-shadow:0 8px 20px rgba(15,23,42,.05);
-    }
-    .student-thumb{
-      width:84px;
-      height:108px;
-      border-radius:12px;
-      overflow:hidden;
-      background:#f3f4f6;
-      border:1px solid #e5e7eb;
-    }
-    .student-thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .student-meta b{
-      display:block;
-      font-size:18px;
-      margin-bottom:6px;
-      color:#111827;
-    }
-    .student-meta .small{
-      color:#4b5563;
-      font-size:14px;
-      line-height:1.55;
-    }
-    .photo-wrap{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-      margin-top:8px;
-      align-items:start;
-    }
-    .crop-area,.preview-area,.current-photo-area{
-      background:#f8fafc;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      padding:16px;
-    }
-    .crop-box{
-      width:100%;
-      min-height:320px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      border-radius:12px;
-      background:#e5e7eb;
-      text-align:center;
-      color:#6b7280;
-      padding:10px;
-    }
-    .crop-box img{
-      max-width:100%;
-      display:block;
-    }
-    .preview-box,.current-photo-box{
-      width:220px;
-      height:280px;
-      border:2px dashed #cbd5e1;
-      border-radius:14px;
-      overflow:hidden;
-      background:white;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-bottom:12px;
-    }
-    .preview-box img,.current-photo-box img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .spinner{
-      width:16px;
-      height:16px;
-      border:2px solid rgba(255,255,255,.45);
-      border-top-color:#fff;
-      border-radius:50%;
-      display:inline-block;
-      animation:spin .8s linear infinite;
-      vertical-align:middle;
-      margin-right:8px;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @media (min-width:760px){
-      .grid.two{grid-template-columns:1fr 1fr}
-    }
-    @media (max-width:760px){
-      .container{padding:10px}
-      .header{padding:18px}
-      .header h1{font-size:22px}
-      .actions{flex-direction:column}
-      .btn{width:100%}
-      .photo-wrap{grid-template-columns:1fr}
-      .preview-box,.current-photo-box{width:100%;max-width:240px}
-      .stats-grid{grid-template-columns:1fr}
-      .student-card{grid-template-columns:1fr}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IBFS Lite Offline Admission</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
+.container{max-width:1000px;margin:auto;padding:12px}
+.card{background:#fff;border-radius:16px;box-shadow:0 8px 22px rgba(0,0,0,.08);overflow:hidden}
+.header{background:#2563eb;color:#fff;padding:18px}
+.header h1{margin:0;font-size:22px}
+.header p{margin:6px 0 0;font-size:14px}
+.panel{padding:14px;border-bottom:1px solid #e5e7eb}
+.box{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:14px}
+.grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+label{font-weight:bold;font-size:14px}
+input,select,button{font:inherit}
+input,select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+input[readonly]{background:#f3f4f6}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:bold;cursor:pointer}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-success{background:#16a34a;color:#fff}
+.btn-warning{background:#f59e0b;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-secondary{background:#e5e7eb;color:#111827}
+.status{display:none;margin-top:12px;padding:12px;border-radius:10px;font-weight:bold}
+.status.show{display:block}
+.info{background:#dbeafe;color:#1d4ed8}
+.success{background:#dcfce7;color:#166534}
+.error{background:#fee2e2;color:#991b1b}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:1fr;gap:10px}
+@media(min-width:760px){.stats{grid-template-columns:repeat(3,1fr)}}
+.stat{padding:18px;border-radius:14px;color:#fff}
+.total{background:#1d4ed8}.male{background:#16a34a}.female{background:#db2777}
+.stat .num{font-size:32px;font-weight:bold}
+.student-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px;display:grid;grid-template-columns:80px 1fr;gap:12px;margin-top:12px}
+@media(min-width:760px){.student-card{grid-template-columns:80px 1fr 170px}}
+.student-thumb{width:80px;height:100px;background:#e5e7eb;border-radius:10px;overflow:hidden}
+.student-thumb img{width:100%;height:100%;object-fit:cover}
+.small{font-size:14px;line-height:1.6;color:#4b5563}
+.photo-wrap{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.photo-wrap{grid-template-columns:1fr 1fr}}
+.preview-box,.crop-box{min-height:260px;border:1px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f3f4f6}
+.preview-box img{width:220px;height:280px;object-fit:cover}
+.crop-box img{max-width:100%}
+.offline-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px;margin-top:12px}
+.offline-row{border-top:1px solid #fed7aa;padding-top:8px;margin-top:8px;font-size:13px}
+.badge{background:#e5e7eb;border-radius:999px;padding:7px 10px;font-weight:bold}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="card">
-      <div class="header">
-        <h1>Indus Bright Future School System</h1>
-        <p>Admission Pro 2026</p>
-      </div>
+<div class="container">
+<div class="card">
+<div class="header">
+<h1>Indus Bright Future School System</h1>
+<p>Lite Offline Admission 2026</p>
+</div>
 
-      <!-- LOGIN -->
-      <div class="panel" id="loginPanel">
-        <div class="box">
-          <div class="section-title">School Login</div>
-          <div class="grid two">
-            <div class="field">
-              <label for="username">User Name</label>
-              <input id="username" placeholder="Enter user name" />
-            </div>
-            <div class="field">
-              <label for="password">Password</label>
-              <input id="password" type="password" placeholder="Enter password" />
-            </div>
-          </div>
-          <div class="actions">
-            <button type="button" class="btn btn-primary" id="loginBtn">Login</button>
-          </div>
-          <div id="loginStatus" class="status"></div>
+<div class="panel" id="loginPanel">
+<div class="box">
+<h3>School Login</h3>
+<div class="grid two">
+<div><label>User Name</label><input id="username"></div>
+<div><label>Password</label><input id="password" type="password"></div>
+</div>
+<div class="actions"><button class="btn btn-primary" onclick="loginUser()">Login</button></div>
+<div id="loginStatus" class="status"></div>
+</div>
+</div>
+
+<div id="appPanel" class="hidden">
+<div class="panel">
+<div class="actions">
+<span class="badge">School Code: <span id="loggedInSchoolLabel"></span></span>
+<button class="btn btn-success" onclick="newAdmission()">New Admission</button>
+<button class="btn btn-primary" onclick="showSearch()">Search</button>
+<button class="btn btn-warning" onclick="downloadSchoolPdf()">Download PDF</button>
+<button class="btn btn-secondary" onclick="syncOfflineRecords()">Sync Pending</button>
+<button class="btn btn-danger" onclick="logoutUser()">Logout</button>
+</div>
+<div id="mainStatus" class="status"></div>
+</div>
+
+<div class="panel" id="dashboardPanel">
+<div class="stats">
+<div class="stat total"><div>Total Students</div><div class="num" id="totalCount">0</div></div>
+<div class="stat male"><div>Male</div><div class="num" id="maleCount">0</div></div>
+<div class="stat female"><div>Female</div><div class="num" id="femaleCount">0</div></div>
+</div>
+<div class="offline-box">
+<b>Offline Pending Records: <span id="pendingCount">0</span></b>
+<div id="offlineList"></div>
+</div>
+</div>
+
+<div class="panel hidden" id="searchPanel">
+<div class="box">
+<h3>Search Existing Record</h3>
+<label>GR No</label>
+<input id="searchGrNo" inputmode="numeric">
+<div class="actions">
+<button class="btn btn-primary" onclick="searchRecord()">Search</button>
+<button class="btn btn-secondary" onclick="showDashboard()">Back</button>
+</div>
+<div id="searchStatus" class="small"></div>
+<div id="searchResultCard"></div>
+</div>
+</div>
+
+<form id="admissionForm" class="hidden" onsubmit="submitForm(event)">
+<input type="hidden" id="mode" value="create">
+<input type="hidden" id="originalSchoolCode">
+<input type="hidden" id="originalGrNo">
+<input type="hidden" id="existingPhotoUrl">
+
+<div class="panel">
+<h3 id="formTitle">New Admission</h3>
+<div class="grid two">
+<div><label>School Code</label><input id="schoolCode" readonly></div>
+<div><label>GR No</label><input id="grNo" inputmode="numeric"></div>
+<div><label>Student Name</label><input id="studentName"></div>
+<div><label>Surname / Cast</label><input id="surnameCast"></div>
+<div><label>B Form No</label><input id="bFormNo" inputmode="numeric" maxlength="13"></div>
+<div><label>Father Name</label><input id="fatherName"></div>
+<div><label>Father CNIC</label><input id="fatherCnic" inputmode="numeric" maxlength="13"></div>
+<div><label>Mother Name</label><input id="motherName"></div>
+<div><label>Mother CNIC</label><input id="motherCnic" inputmode="numeric" maxlength="13"></div>
+<div><label>Gender</label><select id="gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+<div><label>Date of Birth</label><input id="dob" type="date"></div>
+<div><label>Admit in Class</label><select id="admitClass"><option value="">Select</option><option>Kachi</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select></div>
+<div><label>Current Class</label><select id="currentClass"><option value="">Select</option><option>Kachi</option><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select></div>
+<div><label>Religion</label><select id="religion"><option value="">Select</option><option>Islam</option><option>Hindu</option><option>Christian</option></select></div>
+<div><label>Birth Place</label><input id="birthPlace"></div>
+<div><label>Date of Admission</label><input id="dateOfAdmission" type="date"></div>
+<div><label>Shift</label><select id="shift"><option value="">Select</option><option>Morning</option><option>Evening</option></select></div>
+<div><label>Student Photo</label><input id="photoInput" type="file" accept="image/*"></div>
+</div>
+</div>
+
+<div class="panel">
+<div class="photo-wrap">
+<div class="box">
+<b>Crop Photo</b>
+<div class="crop-box" style="margin-top:10px"><img id="imageToCrop" class="hidden"><span id="cropText">Photo will appear here</span></div>
+<div class="actions">
+<button type="button" class="btn btn-secondary" onclick="rotatePhoto(-90)">Rotate Left</button>
+<button type="button" class="btn btn-secondary" onclick="rotatePhoto(90)">Rotate Right</button>
+<button type="button" class="btn btn-primary" onclick="applyCrop()">Apply Crop</button>
+</div>
+</div>
+<div class="box">
+<b>Preview</b>
+<div class="preview-box" style="margin-top:10px"><img id="croppedPreview" class="hidden"><span id="previewText">No photo</span></div>
+</div>
+</div>
+<div class="actions">
+<button class="btn btn-success" type="submit" id="saveBtn">Save Admission</button>
+<button class="btn btn-secondary" type="button" onclick="showDashboard()">Cancel</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script>
+const APPS_SCRIPT_WEB_APP_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+let loggedInSchoolCode = "";
+let cropper = null;
+let croppedImageBase64 = "";
+
+function digitsOnly(v){return String(v||"").replace(/\D/g,"")}
+function clean(v){return String(v||"").trim()}
+function show(el){document.getElementById(el).classList.remove("hidden")}
+function hide(el){document.getElementById(el).classList.add("hidden")}
+function status(id,msg,type="info"){const e=document.getElementById(id);e.textContent=msg;e.className="status show "+type}
+function clearStatus(id){const e=document.getElementById(id);e.textContent="";e.className="status"}
+async function postToScript(payload){
+  const r=await fetch(APPS_SCRIPT_WEB_APP_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+  return await r.json();
+}
+function photoUrl(url){
+  if(!url)return "";
+  const m=String(url).match(/[?&]id=([^&]+)/)||String(url).match(/\/d\/([^/]+)/);
+  return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w600`:url;
+}
+
+/* OFFLINE */
+function offlineKey(){return "IBFS_OFFLINE_"+loggedInSchoolCode}
+function getOffline(){return JSON.parse(localStorage.getItem(offlineKey())||"[]")}
+function setOffline(a){localStorage.setItem(offlineKey(),JSON.stringify(a));renderOffline()}
+function saveOffline(payload, reason){
+  const arr=getOffline();
+  const key=payload.schoolCode+"-"+payload.grNo;
+  if(arr.some(x=>x.key===key)){status("mainStatus","This GR No is already pending offline.","error");return}
+  arr.push({key,status:"pending",reason:reason||"",payload,createdAt:new Date().toLocaleString()});
+  setOffline(arr);
+  status("mainStatus","Internet slow/offline. Record saved in Pending Sync.","info");
+}
+function renderOffline(){
+  const box=document.getElementById("offlineList");
+  const arr=getOffline();
+  document.getElementById("pendingCount").textContent=arr.length;
+  box.innerHTML="";
+  arr.slice().reverse().forEach(x=>{
+    const p=x.payload;
+    box.innerHTML+=`<div class="offline-row"><b>${p.studentName||""}</b><br>GR: ${p.grNo} | Status: ${x.status}${x.reason?` | ${x.reason}`:""}</div>`;
+  });
+}
+async function syncOfflineRecords(){
+  if(!loggedInSchoolCode)return;
+  if(!navigator.onLine){status("mainStatus","Internet is not available.","error");return}
+  let arr=getOffline();
+  if(!arr.length){status("mainStatus","No pending records.","success");return}
+  status("mainStatus","Sync started...","info");
+  const remain=[];
+  for(const item of arr){
+    try{
+      const res=await postToScript(item.payload);
+      if(!res.success){
+        item.status="failed";
+        item.reason=res.message||"Sync failed";
+        remain.push(item);
+      }
+    }catch(e){
+      item.status="pending";
+      item.reason="Network error";
+      remain.push(item);
+    }
+  }
+  setOffline(remain);
+  await loadDashboard();
+  status("mainStatus",remain.length?`${remain.length} record(s) still pending/failed.`:"All pending records synced.","success");
+}
+window.addEventListener("online",()=>{if(loggedInSchoolCode)syncOfflineRecords()});
+
+/* LOGIN */
+async function loginUser(){
+  clearStatus("loginStatus");
+  const username=clean(document.getElementById("username").value);
+  const password=clean(document.getElementById("password").value);
+  if(!username||!password){status("loginStatus","User name and password required.","error");return}
+  try{
+    const res=await postToScript({action:"login",username,password});
+    if(!res.success)throw new Error(res.message||"Login failed");
+    loggedInSchoolCode=clean(res.schoolCode);
+    document.getElementById("loggedInSchoolLabel").textContent=loggedInSchoolCode;
+    document.getElementById("schoolCode").value=loggedInSchoolCode;
+    hide("loginPanel");show("appPanel");
+    await loadDashboard();
+    showDashboard();
+  }catch(e){status("loginStatus",e.message,"error")}
+}
+function logoutUser(){location.reload()}
+
+/* DASHBOARD */
+async function loadDashboard(){
+  try{
+    const res=await postToScript({action:"dashboard",schoolCode:loggedInSchoolCode});
+    if(!res.success)throw new Error(res.message||"Dashboard failed");
+    document.getElementById("totalCount").textContent=res.total||0;
+    document.getElementById("maleCount").textContent=res.male||0;
+    document.getElementById("femaleCount").textContent=res.female||0;
+  }catch(e){status("mainStatus",e.message,"error")}
+  renderOffline();
+}
+function showDashboard(){
+  show("dashboardPanel");hide("searchPanel");hide("admissionForm");clearStatus("mainStatus");renderOffline()
+}
+function showSearch(){
+  hide("dashboardPanel");show("searchPanel");hide("admissionForm");
+  document.getElementById("searchResultCard").innerHTML="";
+  document.getElementById("searchStatus").textContent="";
+}
+function newAdmission(){
+  resetForm();
+  document.getElementById("mode").value="create";
+  document.getElementById("formTitle").textContent="New Admission";
+  document.getElementById("saveBtn").textContent="Save Admission";
+  hide("dashboardPanel");hide("searchPanel");show("admissionForm");
+}
+
+/* SEARCH CARD */
+async function searchRecord(){
+  const grNo=digitsOnly(document.getElementById("searchGrNo").value);
+  const card=document.getElementById("searchResultCard");
+  const msg=document.getElementById("searchStatus");
+  card.innerHTML="";
+  if(!grNo){msg.textContent="Enter GR No";return}
+  msg.textContent="Searching...";
+  try{
+    let res=null;
+    if(navigator.onLine){
+      try{res=await postToScript({action:"search",schoolCode:loggedInSchoolCode,grNo})}catch(e){}
+    }
+    if(!res||!res.success){
+      const found=getOffline().find(x=>digitsOnly(x.payload.grNo)===grNo);
+      if(found)res={success:true,record:found.payload,offline:true};
+    }
+    if(!res||!res.success)throw new Error((res&&res.message)||"No data found");
+    renderSearchCard(res.record,!!res.offline);
+    msg.textContent="";
+  }catch(e){msg.textContent=e.message}
+}
+function renderSearchCard(r,isOffline){
+  const img=r.studentPhotoBase64||photoUrl(r.studentPhoto||r.existingPhotoUrl);
+  document.getElementById("searchResultCard").innerHTML=`
+    <div class="student-card">
+      <div class="student-thumb">${img?`<img src="${img}">`:""}</div>
+      <div>
+        <b>${r.studentName||""}</b>
+        <div class="small">
+          Father: ${r.fatherName||""}<br>
+          GR No: ${r.grNo||""}<br>
+          Class: ${r.currentClass||""}<br>
+          ${isOffline?"Status: Offline Pending":""}
         </div>
       </div>
-
-      <!-- APP -->
-      <div id="appPanel" class="hidden">
-        <div class="panel">
-          <div class="box">
-            <div class="section-title">Dashboard Tools</div>
-            <div class="actions" style="align-items:center;">
-              <span class="school-pill">School Code: <span id="loggedInSchoolLabel"></span></span>
-              <button type="button" class="btn btn-success" id="newAdmissionBtn">New Admission</button>
-              <button type="button" class="btn btn-primary" id="openSearchBtn">Search Existing Record</button>
-              <button type="button" class="btn btn-warning" id="downloadPdfBtn">Download PDF</button>
-              <button type="button" class="btn btn-primary" id="topSyncBtn">Sync Pending</button>
-              <button type="button" class="btn btn-danger" id="logoutBtn">Logout</button>
-              <span class="badge" id="modeBadge">Idle</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- DASHBOARD -->
-        <div class="panel" id="dashboardPanel">
-          <div class="stats-grid">
-            <div class="stat-card total"><div class="label">Total Students</div><div class="value" id="totalCount">0</div></div>
-            <div class="stat-card male"><div class="label">Male</div><div class="value" id="maleCount">0</div></div>
-            <div class="stat-card female"><div class="label">Female</div><div class="value" id="femaleCount">0</div></div>
-          </div>
-
-          <div class="offline-box" id="offlineBox">
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">
-              <div>
-                <div class="section-title">Offline Sync</div>
-                <div class="note" id="networkStatus">Checking network...</div>
-              </div>
-              <div class="actions" style="margin-top:0;">
-                <span class="badge" id="pendingBadge">Pending: 0</span>
-                <button type="button" class="btn btn-primary" id="syncBtn">Sync Pending Data</button>
-              </div>
-            </div>
-            <div id="offlineList" class="note" style="margin-top:10px;"></div>
-          </div>
-
-          <div id="dashboardSummary" class="note" style="margin-top:10px;font-weight:600;">Lite mode: use GR No search to open records.</div>
-        </div>
-
-        <!-- SEARCH -->
-        <div class="panel hidden" id="searchPanel">
-          <div class="box">
-            <div class="section-title">Search Existing Record</div>
-            <div class="grid">
-              <div class="field">
-                <label for="searchGrNo">GR No</label>
-                <input id="searchGrNo" inputmode="numeric" />
-              </div>
-            </div>
-            <div class="actions">
-              <button type="button" class="btn btn-primary" id="searchBtn">Search Record</button>
-              <button type="button" class="btn btn-secondary" id="closeSearchBtn">Close Search</button>
-            </div>
-            <div id="searchStatus" class="note"></div>
-          </div>
-        </div>
-
-        <!-- FORM -->
-        <form id="admissionForm" novalidate class="hidden">
-          <input type="hidden" id="mode" value="create" />
-          <input type="hidden" id="originalSchoolCode" value="" />
-          <input type="hidden" id="originalGrNo" value="" />
-          <input type="hidden" id="existingPhotoUrl" value="" />
-
-          <div class="panel">
-            <div id="stepIndicator" class="note" style="font-size:15px;font-weight:600;margin-bottom:8px;">Step 1 of 2 - Student & Admission</div>
-            <div style="width:100%;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden;">
-              <div id="progressBar" style="width:50%;height:100%;background:#2563eb;transition:width .25s ease;"></div>
-            </div>
-          </div>
-
-          <!-- STEP 1 -->
-          <div class="panel" id="step1">
-            <div class="grid two">
-              <div class="section-title">Student Information</div>
-
-              <div class="field">
-                <label for="schoolCode">School Code</label>
-                <input id="schoolCode" readonly />
-              </div>
-
-              <div class="field">
-                <label for="grNo">GR No</label>
-                <input id="grNo" inputmode="numeric" />
-              </div>
-
-              <div class="field">
-                <label for="studentName">Student Name</label>
-                <input id="studentName" />
-              </div>
-
-              <div class="field">
-                <label for="surnameCast">Surname / Cast</label>
-                <input id="surnameCast" />
-              </div>
-
-              <div class="field">
-                <label for="gender">Gender</label>
-                <select id="gender">
-                  <option value="">Select Gender</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="dob">Date of Birth</label>
-                <input id="dob" type="date" />
-              </div>
-
-              <div class="field">
-                <label for="birthPlace">Birth Place</label>
-                <input id="birthPlace" />
-              </div>
-
-              <div class="field">
-                <label for="religion">Religion</label>
-                <select id="religion">
-                  <option value="">Select Religion</option>
-                  <option>Islam</option>
-                  <option>Hindu</option>
-                  <option>Christian</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="admitClass">Admit in Class</label>
-                <select id="admitClass">
-                  <option value="">Select Class</option>
-                  <option>Kachi</option>
-                  <option>I</option>
-                  <option>II</option>
-                  <option>III</option>
-                  <option>IV</option>
-                  <option>V</option>
-                  <option>VI</option>
-                  <option>VII</option>
-                  <option>VIII</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="currentClass">Current Class</label>
-                <select id="currentClass">
-                  <option value="">Select Class</option>
-                  <option>Kachi</option>
-                  <option>I</option>
-                  <option>II</option>
-                  <option>III</option>
-                  <option>IV</option>
-                  <option>V</option>
-                  <option>VI</option>
-                  <option>VII</option>
-                  <option>VIII</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="dateOfAdmission">Date of Admission</label>
-                <input id="dateOfAdmission" type="date" />
-              </div>
-
-              <div class="field">
-                <label for="shift">Shift</label>
-                <select id="shift">
-                  <option value="">Select Shift</option>
-                  <option>Morning</option>
-                  <option>Evening</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="bFormNo">B Form No</label>
-                <input id="bFormNo" inputmode="numeric" maxlength="13" />
-                <div class="note">13 digits required</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- STEP 2 -->
-          <div class="panel hidden" id="step2">
-            <div class="grid two">
-              <div class="section-title">Parent Information</div>
-
-              <div class="field">
-                <label for="fatherName">Father Name</label>
-                <input id="fatherName" />
-              </div>
-
-              <div class="field">
-                <label for="fatherCnic">Father CNIC No</label>
-                <input id="fatherCnic" inputmode="numeric" maxlength="13" />
-              </div>
-
-              <div class="field">
-                <label for="motherName">Mother Name</label>
-                <input id="motherName" />
-              </div>
-
-              <div class="field">
-                <label for="motherCnic">Mother CNIC No</label>
-                <input id="motherCnic" inputmode="numeric" maxlength="13" />
-              </div>
-
-              <div class="current-photo-area">
-                <strong>Current Photo</strong>
-                <div class="current-photo-box" style="margin-top:12px;">
-                  <img id="existingPhotoPreview" class="hidden" alt="Current photo" />
-                  <span id="existingPhotoPlaceholder">No existing photo loaded</span>
-                </div>
-              </div>
-
-              <div class="field">
-                <label for="photoInput">New Student Photo</label>
-                <input id="photoInput" type="file" accept="image/*" />
-                <div class="note">Required in New Admission. Optional in Update mode.</div>
-              </div>
-
-              <div class="photo-wrap" style="grid-column:1 / -1;">
-                <div class="crop-area">
-                  <strong>Crop Area</strong>
-                  <div class="crop-box" style="margin-top:12px;">
-                    <img id="imageToCrop" class="hidden" alt="Photo to crop" />
-                    <span id="cropPlaceholder">Selected photo will appear here</span>
-                  </div>
-                  <div class="actions">
-                    <button type="button" class="btn btn-secondary" id="rotateLeft">Rotate Left</button>
-                    <button type="button" class="btn btn-secondary" id="rotateRight">Rotate Right</button>
-                    <button type="button" class="btn btn-primary" id="cropBtn">Apply Crop</button>
-                  </div>
-                </div>
-
-                <div class="preview-area">
-                  <strong>New Photo Preview</strong>
-                  <div class="preview-box" style="margin-top:12px;">
-                    <img id="croppedPreview" class="hidden" alt="Cropped preview" />
-                    <span id="previewPlaceholder">No new cropped image yet</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="actions">
-              <button type="button" class="btn btn-secondary" id="backBtn" style="display:none;">Back</button>
-              <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
-              <button type="submit" class="btn btn-success" id="submitBtn" style="display:none;">Submit Admission</button>
-              <button type="button" class="btn btn-warning hidden" id="updateBtn">Update Record</button>
-              <button type="button" class="btn btn-secondary" id="resetBtn">Reset Form</button>
-              <button type="button" class="btn btn-secondary" id="cancelBtn">Back to Dashboard</button>
-            </div>
-            <div id="statusBox" class="status info"></div>
-          </div>
-        </form>
+      <div class="actions" style="margin-top:0">
+        <button class="btn btn-primary" onclick="openEdit('${r.grNo}',${isOffline})">Manage</button>
+        <button class="btn btn-danger" onclick="deleteRecord('${r.grNo}',${isOffline})">Delete</button>
       </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-  <script>
-    const APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzkja68kzTrywDKPXwlIXpLnlTqI9fGO9IaEtMqpTzfhEBwYypO-6CUArDJ7GACUE-QFg/exec';
-
-    const loginPanel = document.getElementById('loginPanel');
-    const appPanel = document.getElementById('appPanel');
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const loginStatus = document.getElementById('loginStatus');
-    const loggedInSchoolLabel = document.getElementById('loggedInSchoolLabel');
-    const dashboardPanel = document.getElementById('dashboardPanel');
-    const totalCount = document.getElementById('totalCount');
-    const maleCount = document.getElementById('maleCount');
-    const femaleCount = document.getElementById('femaleCount');
-    const dashboardSummary = document.getElementById('dashboardSummary');
-    const syncBtn = document.getElementById('syncBtn');
-    const topSyncBtn = document.getElementById('topSyncBtn');
-    const pendingBadge = document.getElementById('pendingBadge');
-    const offlineList = document.getElementById('offlineList');
-    const networkStatus = document.getElementById('networkStatus');
-    const offlineBox = document.getElementById('offlineBox');
-    const form = document.getElementById('admissionForm');
-    const searchPanel = document.getElementById('searchPanel');
-    const searchBtn = document.getElementById('searchBtn');
-    const closeSearchBtn = document.getElementById('closeSearchBtn');
-    const openSearchBtn = document.getElementById('openSearchBtn');
-    const newAdmissionBtn = document.getElementById('newAdmissionBtn');
-    const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const modeBadge = document.getElementById('modeBadge');
-    const searchStatus = document.getElementById('searchStatus');
-    const cancelBtn = document.getElementById('cancelBtn');
-    const photoInput = document.getElementById('photoInput');
-    const imageToCrop = document.getElementById('imageToCrop');
-    const cropPlaceholder = document.getElementById('cropPlaceholder');
-    const croppedPreview = document.getElementById('croppedPreview');
-    const previewPlaceholder = document.getElementById('previewPlaceholder');
-    const existingPhotoPreview = document.getElementById('existingPhotoPreview');
-    const existingPhotoPlaceholder = document.getElementById('existingPhotoPlaceholder');
-    const statusBox = document.getElementById('statusBox');
-    const submitBtn = document.getElementById('submitBtn');
-    const updateBtn = document.getElementById('updateBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const backBtn = document.getElementById('backBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    let cropper = null;
-    let croppedImageBase64 = '';
-    let currentStep = 1;
-    let loggedInSchoolCode = '';
-
-    function digitsOnly(value){ return (value || '').toString().replace(/\D/g, ''); }
-
-    function extractDriveFileId(url){
-      if(!url) return '';
-      let m = String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if(m) return m[1];
-      m = String(url).match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if(m) return m[1];
-      return '';
+    </div>`;
+}
+async function openEdit(grNo,isOffline){
+  try{
+    let rec=null;
+    if(isOffline){
+      const f=getOffline().find(x=>digitsOnly(x.payload.grNo)===digitsOnly(grNo));
+      if(f)rec=f.payload;
+    }else{
+      const res=await postToScript({action:"search",schoolCode:loggedInSchoolCode,grNo});
+      if(!res.success)throw new Error(res.message);
+      rec=res.record;
     }
-
-    function toPreviewImageUrl(url){
-      if(!url) return '';
-      const fileId = extractDriveFileId(url);
-      if(!fileId) return url;
-      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-    }
-
-    function showLoginStatus(message,type='info'){
-      loginStatus.textContent = message;
-      loginStatus.className = `status show ${type}`;
-    }
-
-    function hideLoginStatus(){
-      loginStatus.textContent = '';
-      loginStatus.className = 'status';
-    }
-
-    function clearInlineErrors(){
-      form.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-      form.querySelectorAll('.inline-error').forEach(el => el.remove());
-    }
-
-    function setInlineError(el,message){
-      if(!el) return;
-      el.classList.add('field-error');
-      const next = el.nextElementSibling;
-      if(next && next.classList && next.classList.contains('inline-error')){
-        next.textContent = message;
-        return;
-      }
-      const error = document.createElement('div');
-      error.className = 'inline-error';
-      error.textContent = message;
-      el.insertAdjacentElement('afterend', error);
-    }
-
-    function showStatus(message,type='info'){
-      statusBox.textContent = message;
-      statusBox.className = `status show ${type}`;
-    }
-
-    function hideStatus(){
-      statusBox.className = 'status info';
-      statusBox.textContent = '';
-      clearInlineErrors();
-    }
-
-    function setMode(mode){
-      document.getElementById('mode').value = mode;
-      const isUpdate = mode === 'update';
-      submitBtn.classList.toggle('hidden', isUpdate);
-      updateBtn.classList.toggle('hidden', !isUpdate);
-      modeBadge.textContent = isUpdate ? 'Update Mode' : mode === 'create' ? 'New Admission' : 'Idle';
-      showStep(currentStep);
-    }
-
-    function resetPhotoUI(){
-      if(cropper){ cropper.destroy(); cropper = null; }
-      imageToCrop.src = '';
-      imageToCrop.classList.add('hidden');
-      cropPlaceholder.classList.remove('hidden');
-      croppedPreview.src = '';
-      croppedPreview.classList.add('hidden');
-      previewPlaceholder.classList.remove('hidden');
-      croppedImageBase64 = '';
-      photoInput.value = '';
-    }
-
-    function setExistingPhoto(url){
-      document.getElementById('existingPhotoUrl').value = url || '';
-      if(url){
-        existingPhotoPreview.src = toPreviewImageUrl(url);
-        existingPhotoPreview.classList.remove('hidden');
-        existingPhotoPlaceholder.classList.add('hidden');
-        existingPhotoPreview.onerror = function(){
-          const fileId = extractDriveFileId(url);
-          if(fileId) this.src = `https://drive.google.com/uc?export=view&id=${fileId}`;
-        };
-      }else{
-        existingPhotoPreview.src = '';
-        existingPhotoPreview.classList.add('hidden');
-        existingPhotoPlaceholder.classList.remove('hidden');
-      }
-    }
-
-    function getStepFields(step){
-      if(step === 1) return ['grNo','studentName','surnameCast','gender','dob','birthPlace','religion','admitClass','currentClass','dateOfAdmission','shift','bFormNo'];
-      return ['fatherName','fatherCnic','motherName','motherCnic'];
-    }
-
-    function validateStep(step){
-      clearInlineErrors();
-      const fields = getStepFields(step);
-
-      for(const id of fields){
-        const el = document.getElementById(id);
-        if(!el) continue;
-
-        if(['grNo','bFormNo','fatherCnic','motherCnic'].includes(id)){
-          el.value = digitsOnly(el.value);
-        }
-
-        const value = (el.value || '').trim();
-
-        if(id === 'grNo'){
-          if(!value){ setInlineError(el,'GR No is required.'); el.focus(); showStatus('Please complete all required fields.','error'); return false; }
-          continue;
-        }
-
-        if(id === 'bFormNo' || id === 'fatherCnic' || id === 'motherCnic'){
-          if(!/^\d{13}$/.test(value)){ setInlineError(el,'This field must be exactly 13 digits.'); el.focus(); showStatus('Please complete all required fields correctly.','error'); return false; }
-          continue;
-        }
-
-        if(!value){
-          setInlineError(el,'This field is required.');
-          el.focus();
-          showStatus('Please complete all required fields.','error');
-          return false;
-        }
-      }
-
-      if(step === 2 && document.getElementById('mode').value === 'create' && !croppedImageBase64){
-        showStatus('Please upload and crop the student photo before submitting.','error');
-        return false;
-      }
-
-      hideStatus();
-      return true;
-    }
-
-    function showStep(step){
-      document.getElementById('step1').classList.toggle('hidden', step !== 1);
-      document.getElementById('step2').classList.toggle('hidden', step !== 2);
-      backBtn.style.display = step === 1 ? 'none' : 'inline-block';
-      nextBtn.style.display = step === 2 ? 'none' : 'inline-block';
-
-      const isUpdate = document.getElementById('mode').value === 'update';
-      submitBtn.style.display = step === 2 && !isUpdate ? 'inline-block' : 'none';
-      updateBtn.style.display = step === 2 && isUpdate ? 'inline-block' : 'none';
-
-      document.getElementById('stepIndicator').innerText =
-        step === 1 ? 'Step 1 of 2 - Student & Admission' : 'Step 2 of 2 - Parent Info & Photo';
-
-      document.getElementById('progressBar').style.width = step === 1 ? '50%' : '100%';
-    }
-
-    function setFormVisible(visible){
-      form.classList.toggle('hidden', !visible);
-    }
-
-    function showDashboardPanel(){
-      dashboardPanel.classList.remove('hidden');
-      searchPanel.classList.add('hidden');
-      setFormVisible(false);
-      hideStatus();
-      modeBadge.textContent = 'Dashboard';
-    }
-
-    function showSearchPanel(){
-      dashboardPanel.classList.add('hidden');
-      searchPanel.classList.remove('hidden');
-      setFormVisible(false);
-      hideStatus();
-      modeBadge.textContent = 'Search Mode';
-      document.getElementById('searchGrNo').value = '';
-      searchStatus.textContent = '';
-    }
-
-    function showFormPanel(){
-      dashboardPanel.classList.add('hidden');
-      searchPanel.classList.add('hidden');
-      setFormVisible(true);
-    }
-
-    function clearFormForNew(){
-      form.reset();
-      document.getElementById('schoolCode').value = loggedInSchoolCode || '';
-      document.getElementById('originalSchoolCode').value = '';
-      document.getElementById('originalGrNo').value = '';
-      document.getElementById('existingPhotoUrl').value = '';
-      setExistingPhoto('');
-      resetPhotoUI();
-      currentStep = 1;
-      setMode('create');
-      showFormPanel();
-      showStep(1);
-      hideStatus();
-    }
-
-    function fillForm(record){
-      document.getElementById('schoolCode').value = record.schoolCode || loggedInSchoolCode;
-      document.getElementById('grNo').value = record.grNo || '';
-      document.getElementById('studentName').value = record.studentName || '';
-      document.getElementById('surnameCast').value = record.surnameCast || '';
-      document.getElementById('bFormNo').value = record.bFormNo || '';
-      document.getElementById('fatherName').value = record.fatherName || '';
-      document.getElementById('fatherCnic').value = record.fatherCnic || '';
-      document.getElementById('motherName').value = record.motherName || '';
-      document.getElementById('motherCnic').value = record.motherCnic || '';
-      document.getElementById('gender').value = record.gender || '';
-      document.getElementById('dob').value = record.dob || '';
-      document.getElementById('admitClass').value = record.admitClass || '';
-      document.getElementById('currentClass').value = record.currentClass || '';
-      document.getElementById('religion').value = record.religion || '';
-      document.getElementById('birthPlace').value = record.birthPlace || '';
-      document.getElementById('dateOfAdmission').value = record.dateOfAdmission || '';
-      document.getElementById('shift').value = record.shift || '';
-      document.getElementById('originalSchoolCode').value = record.schoolCode || '';
-      document.getElementById('originalGrNo').value = record.grNo || '';
-      setExistingPhoto(record.studentPhoto || '');
-      resetPhotoUI();
-      currentStep = 1;
-      setMode('update');
-      showFormPanel();
-      showStep(1);
-    }
-
-    async function compressImageBeforeCrop(file){
-      return new Promise((resolve,reject)=>{
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => {
-            const maxWidth = 700;
-            const scale = Math.min(1, maxWidth / img.width);
-            const canvas = document.createElement('canvas');
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL('image/jpeg', 0.6));
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function postToScript(payload, timeoutMs = 25000){
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try{
-        const response = await fetch(APPS_SCRIPT_WEB_APP_URL + '?t=' + Date.now(),{
-          method:'POST',
-          headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-          body:JSON.stringify(payload),
-          signal:controller.signal
-        });
-        return response.json();
-      }finally{
-        clearTimeout(timer);
-      }
-    }
-
-    const OFFLINE_DB_NAME = 'IBFS_OFFLINE_DB_V1';
-    const OFFLINE_STORE = 'admissions';
-
-    function openOfflineDb(){
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(OFFLINE_DB_NAME, 1);
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if(!db.objectStoreNames.contains(OFFLINE_STORE)){
-            db.createObjectStore(OFFLINE_STORE, { keyPath:'id' });
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error('Offline database could not open.'));
-      });
-    }
-
-    async function getOfflineRecords(){
-      const db = await openOfflineDb();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(OFFLINE_STORE, 'readonly');
-        const store = tx.objectStore(OFFLINE_STORE);
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => reject(req.error || new Error('Offline records could not load.'));
-      });
-    }
-
-    async function putOfflineRecord(record){
-      const db = await openOfflineDb();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(OFFLINE_STORE, 'readwrite');
-        tx.objectStore(OFFLINE_STORE).put(record);
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error || new Error('Offline record could not save.'));
-      });
-    }
-
-    async function deleteOfflineRecord(id){
-      const db = await openOfflineDb();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(OFFLINE_STORE, 'readwrite');
-        tx.objectStore(OFFLINE_STORE).delete(id);
-        tx.oncomplete = resolve;
-        tx.onerror = () => reject(tx.error || new Error('Offline record could not delete.'));
-      });
-    }
-
-    function makeRecordKey(rec){
-      return String(rec.schoolCode || '') + '-' + String(rec.grNo || '') + '-' + String(rec.action || 'create');
-    }
-
-    async function saveOfflineRecord(payload, reason){
-      const records = await getOfflineRecords();
-      const key = makeRecordKey(payload);
-      const duplicatePending = records.find(r => makeRecordKey(r.payload) === key && r.status === 'pending');
-      if(duplicatePending){ throw new Error('This record is already pending offline: ' + payload.schoolCode + '-' + payload.grNo); }
-      await putOfflineRecord({
-        id: Date.now() + '_' + Math.random().toString(36).slice(2),
-        status: 'pending',
-        reason: reason || 'offline',
-        createdAt: new Date().toISOString(),
-        payload
-      });
-      updateOfflineUI();
-    }
-
-    async function updateOfflineUI(){
-      try{
-        const records = await getOfflineRecords();
-        const pending = records.filter(r => r.status === 'pending');
-        pendingBadge.textContent = 'Pending: ' + pending.length;
-        networkStatus.textContent = navigator.onLine ? 'Internet available. Pending records can sync.' : 'Offline / weak internet. New records will stay pending.';
-        offlineBox.classList.toggle('offline-ok', navigator.onLine && pending.length === 0);
-        offlineBox.classList.toggle('offline-bad', !navigator.onLine);
-        if(!records.length){ offlineList.textContent = 'No pending offline records.'; return; }
-        offlineList.innerHTML = records.slice(-5).reverse().map(r => {
-          const p = r.payload || {};
-          return `<div class="offline-row"><span>${p.action || ''} | GR ${p.grNo || ''} | ${p.studentName || ''}</span><b>${r.status}${r.error ? ': ' + r.error : ''}</b></div>`;
-        }).join('');
-      }catch(e){
-        pendingBadge.textContent = 'Pending: ?';
-        offlineList.textContent = 'Offline storage error: ' + (e.message || e);
-      }
-    }
-
-    async function smartSubmit(payload){
-      if(navigator.onLine){
-        try{
-          const result = await postToScript(payload, 30000);
-          if(result.success) return { mode:'online', result };
-          return { mode:'online-error', result };
-        }catch(e){
-          await saveOfflineRecord(payload, e.message || 'network error');
-          return { mode:'offline-saved', result:{ success:true, message:'Internet slow/offline. Record saved in Offline Pending.' } };
-        }
-      }
-      await saveOfflineRecord(payload, 'offline');
-      return { mode:'offline-saved', result:{ success:true, message:'No internet. Record saved in Offline Pending.' } };
-    }
-
-    async function syncOfflineRecords(){
-      if(!navigator.onLine){ showStatus('Internet is not available. Pending data is safe offline.','info'); updateOfflineUI(); return; }
-      const records = await getOfflineRecords();
-      const pending = records.filter(r => r.status === 'pending');
-      if(!pending.length){ showStatus('No pending offline records.','success'); updateOfflineUI(); return; }
-      showStatus('Syncing ' + pending.length + ' pending record(s)...','info');
-
-      for(const item of pending){
-        try{
-          const res = await postToScript(item.payload, 35000);
-          if(res.success){
-            await deleteOfflineRecord(item.id);
-          }else{
-            item.status = res.duplicate ? 'failed' : 'pending';
-            item.error = res.message || 'Sync failed';
-            await putOfflineRecord(item);
-            if(item.status === 'failed') continue;
-          }
-        }catch(e){
-          item.status = 'pending';
-          item.error = e.message || 'Network error';
-          await putOfflineRecord(item);
-          break;
-        }
-        updateOfflineUI();
-      }
-
+    fillForm(rec);
+  }catch(e){status("mainStatus",e.message,"error")}
+}
+async function deleteRecord(grNo,isOffline){
+  if(!confirm("Delete this record?"))return;
+  try{
+    if(isOffline){
+      setOffline(getOffline().filter(x=>digitsOnly(x.payload.grNo)!==digitsOnly(grNo)));
+    }else{
+      const res=await postToScript({action:"delete",schoolCode:loggedInSchoolCode,grNo});
+      if(!res.success)throw new Error(res.message);
       await loadDashboard();
-      showStatus('Sync completed. Check failed records if any duplicate GR exists.','success');
-      updateOfflineUI();
     }
+    document.getElementById("searchResultCard").innerHTML="";
+    document.getElementById("searchStatus").textContent="Deleted.";
+  }catch(e){document.getElementById("searchStatus").textContent=e.message}
+}
 
-    async function loginUser(){
-      hideLoginStatus();
-      const username = (document.getElementById('username').value || '').trim();
-      const password = (document.getElementById('password').value || '').trim();
-
-      if(!username || !password){
-        showLoginStatus('User Name and Password are required.','error');
+/* FORM */
+function resetForm(){
+  document.getElementById("admissionForm").reset();
+  document.getElementById("schoolCode").value=loggedInSchoolCode;
+  document.getElementById("originalSchoolCode").value="";
+  document.getElementById("originalGrNo").value="";
+  document.getElementById("existingPhotoUrl").value="";
+  croppedImageBase64="";
+  if(cropper){cropper.destroy();cropper=null}
+  document.getElementById("imageToCrop").src="";
+  document.getElementById("imageToCrop").classList.add("hidden");
+  document.getElementById("cropText").classList.remove("hidden");
+  document.getElementById("croppedPreview").src="";
+  document.getElementById("croppedPreview").classList.add("hidden");
+  document.getElementById("previewText").classList.remove("hidden");
+}
+function fillForm(r){
+  document.getElementById("mode").value="update";
+  document.getElementById("formTitle").textContent="Edit / Update Record";
+  document.getElementById("saveBtn").textContent="Update Record";
+  document.getElementById("schoolCode").value=loggedInSchoolCode;
+  const ids=["grNo","studentName","surnameCast","bFormNo","fatherName","fatherCnic","motherName","motherCnic","gender","dob","admitClass","currentClass","religion","birthPlace","dateOfAdmission","shift"];
+  ids.forEach(id=>{document.getElementById(id).value=r[id]||""});
+  document.getElementById("originalSchoolCode").value=r.schoolCode||loggedInSchoolCode;
+  document.getElementById("originalGrNo").value=r.grNo||"";
+  document.getElementById("existingPhotoUrl").value=r.studentPhoto||r.existingPhotoUrl||"";
+  croppedImageBase64="";
+  hide("dashboardPanel");hide("searchPanel");show("admissionForm");
+}
+function collectPayload(action){
+  return {
+    action,
+    schoolCode:loggedInSchoolCode,
+    grNo:digitsOnly(document.getElementById("grNo").value),
+    studentName:clean(document.getElementById("studentName").value),
+    surnameCast:clean(document.getElementById("surnameCast").value),
+    bFormNo:digitsOnly(document.getElementById("bFormNo").value),
+    fatherName:clean(document.getElementById("fatherName").value),
+    fatherCnic:digitsOnly(document.getElementById("fatherCnic").value),
+    motherName:clean(document.getElementById("motherName").value),
+    motherCnic:digitsOnly(document.getElementById("motherCnic").value),
+    gender:document.getElementById("gender").value,
+    dob:document.getElementById("dob").value,
+    admitClass:document.getElementById("admitClass").value,
+    currentClass:document.getElementById("currentClass").value,
+    religion:document.getElementById("religion").value,
+    birthPlace:clean(document.getElementById("birthPlace").value),
+    dateOfAdmission:document.getElementById("dateOfAdmission").value,
+    shift:document.getElementById("shift").value,
+    studentPhotoBase64:croppedImageBase64,
+    existingPhotoUrl:document.getElementById("existingPhotoUrl").value,
+    originalSchoolCode:document.getElementById("originalSchoolCode").value,
+    originalGrNo:document.getElementById("originalGrNo").value
+  }
+}
+function validatePayload(p){
+  const req=["schoolCode","grNo","studentName","surnameCast","gender","dob","birthPlace","religion","admitClass","currentClass","dateOfAdmission","shift","fatherName","motherName"];
+  for(const k of req){if(!p[k])return k+" is required."}
+  if(!/^\d{13}$/.test(p.bFormNo))return "B Form No must be 13 digits.";
+  if(!/^\d{13}$/.test(p.fatherCnic))return "Father CNIC must be 13 digits.";
+  if(!/^\d{13}$/.test(p.motherCnic))return "Mother CNIC must be 13 digits.";
+  if(p.action==="create"&&!p.studentPhotoBase64)return "Photo is required.";
+  return "";
+}
+async function submitForm(e){
+  e.preventDefault();
+  const action=document.getElementById("mode").value==="update"?"update":"create";
+  const p=collectPayload(action);
+  const err=validatePayload(p);
+  if(err){status("mainStatus",err,"error");return}
+  if(action==="create"){
+    const localDup=getOffline().some(x=>x.payload.schoolCode===p.schoolCode&&digitsOnly(x.payload.grNo)===p.grNo);
+    if(localDup){status("mainStatus","This GR No is already pending offline.","error");return}
+  }
+  if(navigator.onLine){
+    try{
+      const res=await postToScript(p);
+      if(res.success){
+        status("mainStatus",res.message||"Saved successfully.","success");
+        await loadDashboard();
+        showDashboard();
         return;
       }
-
-      try{
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<span class="spinner"></span>Logging in...';
-
-        const result = await postToScript({ action:'login', username, password });
-        if(!result.success) throw new Error(result.message || 'Login failed.');
-
-        loggedInSchoolCode = String(result.schoolCode || '').trim();
-        loggedInSchoolLabel.textContent = loggedInSchoolCode;
-        document.getElementById('schoolCode').value = loggedInSchoolCode;
-
-        loginPanel.classList.add('hidden');
-        appPanel.classList.remove('hidden');
-
-        await loadDashboard();
-        showDashboardPanel();
-        showStatus('Login successful.','success');
-      }catch(error){
-        showLoginStatus(error.message || 'Login failed.','error');
-      }finally{
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Login';
-      }
+      if(res.duplicate)throw new Error(res.message);
+      if(action==="create"){saveOffline(p,res.message);showDashboard();return}
+      throw new Error(res.message||"Save failed");
+    }catch(ex){
+      if(action==="create"){saveOffline(p,ex.message);showDashboard();return}
+      status("mainStatus",ex.message,"error");return;
     }
+  }
+  if(action==="create"){saveOffline(p,"No internet");showDashboard()}
+  else status("mainStatus","Update needs internet. Please try when online.","error");
+}
 
-    function logoutUser(){
-      loggedInSchoolCode = '';
-      document.getElementById('username').value = '';
-      document.getElementById('password').value = '';
-      loggedInSchoolLabel.textContent = '';
-      loginPanel.classList.remove('hidden');
-      appPanel.classList.add('hidden');
-      hideLoginStatus();
-      hideStatus();
-      searchPanel.classList.add('hidden');
-      setFormVisible(false);
-      form.reset();
-      resetPhotoUI();
-      setExistingPhoto('');
-      modeBadge.textContent = 'Idle';
-      totalCount.textContent = '0';
-      maleCount.textContent = '0';
-      femaleCount.textContent = '0';
-    }
+/* PHOTO */
+document.getElementById("photoInput").addEventListener("change",async e=>{
+  const file=e.target.files&&e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=document.getElementById("imageToCrop");
+    img.src=ev.target.result; img.classList.remove("hidden"); document.getElementById("cropText").classList.add("hidden");
+    if(cropper)cropper.destroy();
+    cropper=new Cropper(img,{aspectRatio:3/4,viewMode:1,autoCropArea:1,background:false});
+  };
+  reader.readAsDataURL(file);
+});
+function rotatePhoto(deg){if(cropper)cropper.rotate(deg)}
+function applyCrop(){
+  if(!cropper){status("mainStatus","Upload photo first.","error");return}
+  const canvas=cropper.getCroppedCanvas({width:300,height:400,imageSmoothingQuality:"high"});
+  croppedImageBase64=canvas.toDataURL("image/jpeg",0.5);
+  document.getElementById("croppedPreview").src=croppedImageBase64;
+  document.getElementById("croppedPreview").classList.remove("hidden");
+  document.getElementById("previewText").classList.add("hidden");
+  status("mainStatus","Photo cropped.","success");
+}
 
-    function base64ToPdfBlob(base64){
-      const binary = atob(base64 || '');
-      const bytes = new Uint8Array(binary.length);
-      for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      return new Blob([bytes], { type:'application/pdf' });
-    }
-
-    async function downloadSchoolPdf(){
-      const schoolCode = (loggedInSchoolCode || '').trim();
-      if(!schoolCode){ showStatus('No school is logged in.','error'); return; }
-      if(!navigator.onLine){ showStatus('Internet is required for PDF generation.','error'); return; }
-      try{
-        showStatus('Preparing PDF...','info');
-        const result = await postToScript({ action:'downloadpdf', schoolCode }, 90000);
-        if(!result.success) throw new Error(result.message || 'PDF generation failed.');
-
-        if(result.pdfBase64){
-          const blob = base64ToPdfBlob(result.pdfBase64);
-          const blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = result.fileName || ('School_' + schoolCode + '_Students.pdf');
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
-          showStatus('PDF downloaded.','success');
-          return;
-        }
-
-        if(result.downloadUrl){
-          showStatus('PDF ready. Download is starting...','success');
-          window.location.href = result.downloadUrl;
-          return;
-        }
-
-        throw new Error('PDF data/link was not returned. Deploy latest Apps Script.');
-      }catch(error){ showStatus(error.message || 'PDF download failed.','error'); }
-    }
-
-    async function loadDashboard(){
-      try{
-        const result = await postToScript({ action:'dashboard', schoolCode:loggedInSchoolCode }, 20000);
-        if(!result.success) throw new Error(result.message || 'Dashboard could not be loaded.');
-        totalCount.textContent = result.total || 0;
-        maleCount.textContent = result.male || 0;
-        femaleCount.textContent = result.female || 0;
-        dashboardSummary.textContent = 'Lite mode: records are not loaded on dashboard to save internet. Use GR No search.';
-        updateOfflineUI();
-      }catch(error){
-        totalCount.textContent = '0';
-        maleCount.textContent = '0';
-        femaleCount.textContent = '0';
-        dashboardSummary.textContent = 'Dashboard could not load. You can still save admissions offline.';
-        updateOfflineUI();
-      }
-    }
-
-    async function searchRecord(){
-      const schoolCode = (loggedInSchoolCode || '').trim();
-      const grNo = digitsOnly(document.getElementById('searchGrNo').value);
-      if(!schoolCode || !grNo){ searchStatus.textContent = 'Enter GR No first.'; return; }
-
-      searchStatus.textContent = 'Searching...';
-
-      try{
-        const result = await postToScript({ action:'search', schoolCode, grNo }, 30000);
-        if(!result.success) throw new Error((result.message || 'Record not found.') + ' (School Code: ' + schoolCode + ', GR No: ' + grNo + ')');
-        fillForm(result.record);
-        searchStatus.textContent = 'Record loaded. You can now edit and update it.';
-        showStatus('Record loaded successfully.','success');
-      }catch(error){
-        searchStatus.textContent = error.message || 'Record not found.';
-        showStatus(error.message || 'Record not found.','error');
-      }
-    }
-
-    async function manageRecord(grNo){
-      try{
-        showStatus('Loading record...','info');
-        const result = await postToScript({ action:'search', schoolCode:loggedInSchoolCode, grNo:String(grNo) });
-        if(!result.success) throw new Error((result.message || 'Record not found.') + ' (School Code: ' + schoolCode + ', GR No: ' + grNo + ')');
-        fillForm(result.record);
-        showStatus('Record opened in edit mode.','success');
-      }catch(error){
-        showStatus(error.message || 'Could not open record.','error');
-      }
-    }
-
-    function collectPayload(action){
-      return {
-        action,
-        schoolCode: (loggedInSchoolCode || '').trim(),
-        grNo: digitsOnly(document.getElementById('grNo').value || ''),
-        studentName: (document.getElementById('studentName').value || '').trim(),
-        surnameCast: (document.getElementById('surnameCast').value || '').trim(),
-        bFormNo: digitsOnly(document.getElementById('bFormNo').value || ''),
-        fatherName: (document.getElementById('fatherName').value || '').trim(),
-        fatherCnic: digitsOnly(document.getElementById('fatherCnic').value || ''),
-        motherName: (document.getElementById('motherName').value || '').trim(),
-        motherCnic: digitsOnly(document.getElementById('motherCnic').value || ''),
-        gender: document.getElementById('gender').value || '',
-        dob: document.getElementById('dob').value || '',
-        admitClass: document.getElementById('admitClass').value || '',
-        currentClass: document.getElementById('currentClass').value || '',
-        religion: (document.getElementById('religion').value || '').trim(),
-        birthPlace: (document.getElementById('birthPlace').value || '').trim(),
-        dateOfAdmission: document.getElementById('dateOfAdmission').value || '',
-        shift: document.getElementById('shift').value || '',
-        studentPhotoBase64: croppedImageBase64,
-        existingPhotoUrl: document.getElementById('existingPhotoUrl').value || '',
-        originalSchoolCode: document.getElementById('originalSchoolCode').value || '',
-        originalGrNo: document.getElementById('originalGrNo').value || ''
-      };
-    }
-
-    async function submitAction(action){
-      if(!validateStep(2)) return;
-      if(action === 'update' && !document.getElementById('originalSchoolCode').value){ showStatus('Search and load a record first.','error'); return; }
-      const button = action === 'update' ? updateBtn : submitBtn;
-      const payload = collectPayload(action);
-      try{
-        button.disabled = true;
-        button.innerHTML = `<span class="spinner"></span>Saving...`;
-        showStatus(navigator.onLine ? 'Saving online...' : 'Saving offline...','info');
-        const saved = await smartSubmit(payload);
-        const result = saved.result || {};
-        if(saved.mode === 'online-error') throw new Error(result.message || 'Submission failed.');
-        if(saved.mode === 'offline-saved') showStatus(result.message || 'Saved offline. It will sync when internet returns.','info');
-        else showStatus(result.message || 'Record saved online successfully.','success');
-        await loadDashboard();
-        showDashboardPanel();
-        clearFormForNew();
-        updateOfflineUI();
-      }catch(error){ showStatus(error.message || 'Something went wrong.','error'); }
-      finally{ button.disabled = false; button.textContent = action === 'update' ? 'Update Record' : 'Submit Admission'; }
-    }
-
-    function nextStep(){
-      if(!validateStep(currentStep)) return;
-      if(currentStep < 2){
-        currentStep++;
-        showStep(currentStep);
-      }
-    }
-
-    function prevStep(){
-      if(currentStep > 1){
-        currentStep--;
-        showStep(currentStep);
-      }
-    }
-
-    newAdmissionBtn.addEventListener('click', ()=>{
-      if(!loggedInSchoolCode){ showStatus('Please login first.','error'); return; }
-      clearFormForNew();
-      showStatus('New Admission mode opened.','info');
-    });
-
-    openSearchBtn.addEventListener('click', ()=>{
-      if(!loggedInSchoolCode){ showStatus('Please login first.','error'); return; }
-      showSearchPanel();
-    });
-
-    closeSearchBtn.addEventListener('click', showDashboardPanel);
-    searchBtn.addEventListener('click', searchRecord);
-    document.getElementById('searchGrNo').addEventListener('keydown', e => { if(e.key === 'Enter') searchRecord(); });
-    downloadPdfBtn.addEventListener('click', downloadSchoolPdf);
-    nextBtn.addEventListener('click', nextStep);
-    backBtn.addEventListener('click', prevStep);
-    loginBtn.addEventListener('click', loginUser);
-    logoutBtn.addEventListener('click', logoutUser);
-    resetBtn.addEventListener('click', ()=>{ clearFormForNew(); showStatus('Form reset.','info'); });
-    cancelBtn.addEventListener('click', ()=>{ showDashboardPanel(); clearFormForNew(); });
-    syncBtn.addEventListener('click', syncOfflineRecords);
-    topSyncBtn.addEventListener('click', syncOfflineRecords);
-    window.addEventListener('online', ()=>{ updateOfflineUI(); syncOfflineRecords(); });
-    window.addEventListener('offline', updateOfflineUI);
-
-    photoInput.addEventListener('change', async (event)=>{
-      const file = event.target.files?.[0];
-      if(!file) return;
-
-      try{
-        showStatus('Preparing image...','info');
-        const dataURL = await compressImageBeforeCrop(file);
-        imageToCrop.src = dataURL;
-        imageToCrop.classList.remove('hidden');
-        cropPlaceholder.classList.add('hidden');
-
-        if(cropper) cropper.destroy();
-        cropper = new Cropper(imageToCrop, {
-          aspectRatio: 3 / 4,
-          viewMode: 1,
-          autoCropArea: 1,
-          responsive: true,
-          background: false
-        });
-
-        croppedImageBase64 = '';
-        croppedPreview.classList.add('hidden');
-        previewPlaceholder.classList.remove('hidden');
-        showStatus('Photo loaded. Adjust crop and click Apply Crop.','info');
-      }catch(error){
-        showStatus('Failed to load image.','error');
-      }
-    });
-
-    document.getElementById('rotateLeft').addEventListener('click', ()=>{ if(cropper) cropper.rotate(-90); });
-    document.getElementById('rotateRight').addEventListener('click', ()=>{ if(cropper) cropper.rotate(90); });
-
-    document.getElementById('cropBtn').addEventListener('click', ()=>{
-      if(!cropper){ showStatus('Please upload a photo first.','error'); return; }
-      const canvas = cropper.getCroppedCanvas({ width:300, height:400, imageSmoothingQuality:'high' });
-      croppedImageBase64 = canvas.toDataURL('image/jpeg', 0.5);
-      croppedPreview.src = croppedImageBase64;
-      croppedPreview.classList.remove('hidden');
-      previewPlaceholder.classList.add('hidden');
-      showStatus('Crop applied successfully.','success');
-    });
-
-    form.addEventListener('submit', async (event)=>{
-      event.preventDefault();
-      await submitAction('create');
-    });
-
-    updateBtn.addEventListener('click', async ()=>{
-      await submitAction('update');
-    });
-
-    document.addEventListener('DOMContentLoaded', ()=>{
-      searchPanel.classList.add('hidden');
-      setFormVisible(false);
-      dashboardPanel.classList.add('hidden');
-      modeBadge.textContent = 'Idle';
-      hideStatus();
-      hideLoginStatus();
-      updateOfflineUI();
-    });
-  </script>
+/* PDF */
+function base64ToBlob(base64,type){
+  const bin=atob(base64);
+  const arr=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+  return new Blob([arr],{type});
+}
+async function downloadSchoolPdf(){
+  try{
+    status("mainStatus","Preparing PDF...","info");
+    const res=await postToScript({action:"downloadpdf",schoolCode:loggedInSchoolCode});
+    if(!res.success)throw new Error(res.message||"PDF failed");
+    if(!res.pdfBase64)throw new Error("PDF data not received");
+    const blob=base64ToBlob(res.pdfBase64,"application/pdf");
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=res.fileName||"students.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    status("mainStatus","PDF downloaded.","success");
+  }catch(e){status("mainStatus","PDF failed: "+e.message,"error")}
+}
+</script>
 </body>
 </html>
