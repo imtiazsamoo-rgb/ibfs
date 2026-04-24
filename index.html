@@ -339,6 +339,7 @@
               <button type="button" class="btn btn-success" id="newAdmissionBtn">New Admission</button>
               <button type="button" class="btn btn-primary" id="openSearchBtn">Search Existing Record</button>
               <button type="button" class="btn btn-warning" id="downloadPdfBtn">Download PDF</button>
+              <button type="button" class="btn btn-primary" id="topSyncBtn">Sync Pending</button>
               <button type="button" class="btn btn-danger" id="logoutBtn">Logout</button>
               <span class="badge" id="modeBadge">Idle</span>
             </div>
@@ -606,6 +607,7 @@
     const femaleCount = document.getElementById('femaleCount');
     const dashboardSummary = document.getElementById('dashboardSummary');
     const syncBtn = document.getElementById('syncBtn');
+    const topSyncBtn = document.getElementById('topSyncBtn');
     const pendingBadge = document.getElementById('pendingBadge');
     const offlineList = document.getElementById('offlineList');
     const networkStatus = document.getElementById('networkStatus');
@@ -1108,19 +1110,30 @@
       if(!navigator.onLine){ showStatus('Internet is required for PDF generation.','error'); return; }
       try{
         showStatus('Preparing PDF...','info');
-        const result = await postToScript({ action:'downloadpdf', schoolCode }, 60000);
+        const result = await postToScript({ action:'downloadpdf', schoolCode }, 90000);
         if(!result.success) throw new Error(result.message || 'PDF generation failed.');
-        if(!result.pdfBase64) throw new Error('PDF data was not returned. Deploy latest Apps Script.');
-        const blob = base64ToPdfBlob(result.pdfBase64);
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = result.fileName || ('School_' + schoolCode + '_Students.pdf');
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
-        showStatus('PDF downloaded.','success');
+
+        if(result.pdfBase64){
+          const blob = base64ToPdfBlob(result.pdfBase64);
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = result.fileName || ('School_' + schoolCode + '_Students.pdf');
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+          showStatus('PDF downloaded.','success');
+          return;
+        }
+
+        if(result.downloadUrl){
+          showStatus('PDF ready. Download is starting...','success');
+          window.location.href = result.downloadUrl;
+          return;
+        }
+
+        throw new Error('PDF data/link was not returned. Deploy latest Apps Script.');
       }catch(error){ showStatus(error.message || 'PDF download failed.','error'); }
     }
 
@@ -1150,8 +1163,8 @@
       searchStatus.textContent = 'Searching...';
 
       try{
-        const result = await postToScript({ action:'search', schoolCode, grNo });
-        if(!result.success) throw new Error(result.message || 'Record not found.');
+        const result = await postToScript({ action:'search', schoolCode, grNo }, 30000);
+        if(!result.success) throw new Error((result.message || 'Record not found.') + ' (School Code: ' + schoolCode + ', GR No: ' + grNo + ')');
         fillForm(result.record);
         searchStatus.textContent = 'Record loaded. You can now edit and update it.';
         showStatus('Record loaded successfully.','success');
@@ -1165,7 +1178,7 @@
       try{
         showStatus('Loading record...','info');
         const result = await postToScript({ action:'search', schoolCode:loggedInSchoolCode, grNo:String(grNo) });
-        if(!result.success) throw new Error(result.message || 'Record not found.');
+        if(!result.success) throw new Error((result.message || 'Record not found.') + ' (School Code: ' + schoolCode + ', GR No: ' + grNo + ')');
         fillForm(result.record);
         showStatus('Record opened in edit mode.','success');
       }catch(error){
@@ -1250,6 +1263,7 @@
 
     closeSearchBtn.addEventListener('click', showDashboardPanel);
     searchBtn.addEventListener('click', searchRecord);
+    document.getElementById('searchGrNo').addEventListener('keydown', e => { if(e.key === 'Enter') searchRecord(); });
     downloadPdfBtn.addEventListener('click', downloadSchoolPdf);
     nextBtn.addEventListener('click', nextStep);
     backBtn.addEventListener('click', prevStep);
@@ -1258,6 +1272,7 @@
     resetBtn.addEventListener('click', ()=>{ clearFormForNew(); showStatus('Form reset.','info'); });
     cancelBtn.addEventListener('click', ()=>{ showDashboardPanel(); clearFormForNew(); });
     syncBtn.addEventListener('click', syncOfflineRecords);
+    topSyncBtn.addEventListener('click', syncOfflineRecords);
     window.addEventListener('online', ()=>{ updateOfflineUI(); syncOfflineRecords(); });
     window.addEventListener('offline', updateOfflineUI);
 
