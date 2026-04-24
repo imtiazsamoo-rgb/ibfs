@@ -356,6 +356,7 @@
             <input id="dashboardSearch" placeholder="Search by Student Name or GR No" />
           </div>
 
+          <div id="dashboardSummary" class="note" style="margin-top:10px;font-weight:600;"></div>
           <div id="studentList" class="student-list"></div>
         </div>
 
@@ -595,6 +596,7 @@
     const totalCount = document.getElementById('totalCount');
     const maleCount = document.getElementById('maleCount');
     const femaleCount = document.getElementById('femaleCount');
+    const dashboardSummary = document.getElementById('dashboardSummary');
     const form = document.getElementById('admissionForm');
     const searchPanel = document.getElementById('searchPanel');
     const searchBtn = document.getElementById('searchBtn');
@@ -878,7 +880,7 @@
     }
 
     async function postToScript(payload){
-      const response = await fetch(APPS_SCRIPT_WEB_APP_URL,{
+      const response = await fetch(APPS_SCRIPT_WEB_APP_URL + '?t=' + Date.now(),{
         method:'POST',
         headers:{ 'Content-Type':'text/plain;charset=utf-8' },
         body:JSON.stringify(payload)
@@ -943,6 +945,24 @@
       femaleCount.textContent = '0';
     }
 
+    async function triggerFileDownload(url, fileName){
+      const finalUrl = String(url || '');
+      if(!finalUrl) throw new Error('Download URL not found.');
+
+      const response = await fetch(finalUrl, { method:'GET' });
+      if(!response.ok) throw new Error('PDF file could not be downloaded.');
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      if(fileName) a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+    }
+
     async function downloadSchoolPdf(){
       const schoolCode = (loggedInSchoolCode || '').trim();
       if(!schoolCode){ showStatus('No school is logged in.','error'); return; }
@@ -951,22 +971,28 @@
         showStatus('Preparing PDF...','info');
         const result = await postToScript({ action:'downloadpdf', schoolCode });
         if(!result.success) throw new Error(result.message || 'PDF generation failed.');
-        window.open(result.viewUrl || result.downloadUrl, '_blank');
-        showStatus('PDF is ready.','success');
+        if(!result.downloadUrl) throw new Error('PDF download link was not returned.');
+        await triggerFileDownload(result.downloadUrl, result.fileName || ('School_' + schoolCode + '_Students.pdf'));
+        showStatus('PDF download started.','success');
       }catch(error){
         showStatus(error.message || 'PDF download failed.','error');
       }
     }
 
     function renderDashboardStudents(list){
+      const safeList = Array.isArray(list) ? list : [];
       studentList.innerHTML = '';
+      dashboardSummary.textContent = '';
 
-      if(!list.length){
+      if(!safeList.length){
         studentList.innerHTML = `<div class="box" style="margin-top:14px;">No records found for this school.</div>`;
+        dashboardSummary.textContent = 'Displayed 0 records';
         return;
       }
 
-      list.forEach(student => {
+      dashboardSummary.textContent = `Displayed ${safeList.length} record(s)`;
+
+      safeList.forEach(student => {
         const card = document.createElement('div');
         card.className = 'student-card';
         const imgUrl = student.photo ? toPreviewImageUrl(student.photo) : '';
@@ -1002,11 +1028,19 @@
         const result = await postToScript({ action:'dashboard', schoolCode:loggedInSchoolCode });
         if(!result.success) throw new Error(result.message || 'Dashboard could not be loaded.');
 
-        totalCount.textContent = result.total || 0;
+        const total = Number(result.total || 0);
+        totalCount.textContent = total;
         maleCount.textContent = result.male || 0;
         femaleCount.textContent = result.female || 0;
-        dashboardStudents = result.students || [];
+
+        dashboardStudents = Array.isArray(result.students) ? result.students : [];
         renderDashboardStudents(dashboardStudents);
+
+        if(total !== dashboardStudents.length){
+          dashboardSummary.textContent = `Displayed ${dashboardStudents.length} of ${total} record(s). If this stays on 10, publish the latest Apps Script deployment again.`;
+        }else{
+          dashboardSummary.textContent = `Displayed ${dashboardStudents.length} record(s)`;
+        }
       }catch(error){
         totalCount.textContent = '0';
         maleCount.textContent = '0';
