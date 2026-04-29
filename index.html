@@ -222,9 +222,11 @@ input[readonly]{background:#f3f4f6}
 
 </div>
 
+<div id="formStatus" class="status"></div>
 <div class="actions">
 <button class="btn btn-success" type="submit" id="saveBtn">Save Admission</button>
-<button class="btn btn-secondary" type="button" onclick="showDashboard()">Cancel</button>
+<button class="btn btn-secondary" type="button" onclick="formBack()">Back</button>
+<button class="btn btn-primary hidden" type="button" id="goDashboardBtn" onclick="showDashboard()">Go Dashboard</button>
 </div>
 </div>
 </form>
@@ -255,8 +257,30 @@ function status(id,msg,type="info"){
 
 function clearStatus(id){
   const e=document.getElementById(id);
+  if(!e)return;
   e.textContent="";
   e.className="status";
+}
+
+function formStatus(msg,type="info"){
+  status("formStatus",msg,type);
+}
+
+function clearFormStatus(){
+  clearStatus("formStatus");
+}
+
+function showGoDashboardButton(){
+  document.getElementById("goDashboardBtn").classList.remove("hidden");
+}
+
+function hideGoDashboardButton(){
+  const b=document.getElementById("goDashboardBtn");
+  if(b)b.classList.add("hidden");
+}
+
+function formBack(){
+  showDashboard();
 }
 
 async function postToScript(payload){
@@ -299,10 +323,11 @@ function setOffline(a){
 
 function saveOffline(payload, reason){
   const arr=getOffline();
+  const statusTarget = document.getElementById("admissionForm") && !document.getElementById("admissionForm").classList.contains("hidden") ? "formStatus" : "mainStatus";
   const key=payload.schoolCode+"-"+payload.grNo;
 
   if(arr.some(x=>x.key===key)){
-    status("mainStatus","This GR No is already pending offline.","error");
+    status(statusTarget,"This GR No is already pending offline.","error");
     return;
   }
 
@@ -315,7 +340,7 @@ function saveOffline(payload, reason){
   });
 
   setOffline(arr);
-  status("mainStatus","Internet slow/offline. Record saved in Pending Sync.","info");
+  status(statusTarget,"Internet slow/offline. Record saved in Pending Sync.","info");
 }
 
 function renderOffline(){
@@ -361,6 +386,10 @@ async function syncOfflineRecords(){
       const res=await postToScript(item.payload);
 
       if(!res.success){
+        if(res.duplicate){
+          // Already exists online; remove from pending to avoid repeated duplicate sync.
+          continue;
+        }
         item.status="failed";
         item.reason=res.message||"Sync failed";
         remain.push(item);
@@ -456,6 +485,9 @@ function showSearch(){
 
 function newAdmission(){
   resetForm();
+  clearStatus("mainStatus");
+  clearFormStatus();
+  hideGoDashboardButton();
   document.getElementById("mode").value="create";
   document.getElementById("formTitle").textContent="New Admission";
   document.getElementById("saveBtn").textContent="Save Admission";
@@ -571,6 +603,7 @@ async function deleteRecord(grNo,isOffline){
 
 /* FORM */
 function resetForm(){
+  clearFormStatus();
   document.getElementById("admissionForm").reset();
   document.getElementById("schoolCode").value=loggedInSchoolCode;
   document.getElementById("originalSchoolCode").value="";
@@ -594,6 +627,7 @@ function resetForm(){
 }
 
 function fillForm(r){
+  clearFormStatus();
   document.getElementById("mode").value="update";
   document.getElementById("formTitle").textContent="Edit / Update Record";
   document.getElementById("saveBtn").textContent="Update Record";
@@ -615,6 +649,8 @@ function fillForm(r){
   document.getElementById("existingPhotoUrl").value=r.studentPhoto||r.existingPhotoUrl||"";
 
   croppedImageBase64="";
+  clearFormStatus();
+  hideGoDashboardButton();
 
   hide("dashboardPanel");
   hide("searchPanel");
@@ -669,62 +705,70 @@ function validatePayload(p){
 
 async function submitForm(e){
   e.preventDefault();
+  clearFormStatus();
+  hideGoDashboardButton();
 
-  const action=document.getElementById("mode").value==="update"?"update":"create";
-  const p=collectPayload(action);
-  const err=validatePayload(p);
+  const saveBtn=document.getElementById("saveBtn");
+  const oldText=saveBtn.textContent;
+  saveBtn.disabled=true;
+  saveBtn.textContent="Please wait...";
 
-  if(err){
-    status("mainStatus",err,"error");
-    return;
-  }
+  try{
+    const action=document.getElementById("mode").value==="update"?"update":"create";
+    const p=collectPayload(action);
+    const err=validatePayload(p);
 
-  if(action==="create"){
-    const localDup=getOffline().some(x=>x.payload.schoolCode===p.schoolCode&&digitsOnly(x.payload.grNo)===p.grNo);
-    if(localDup){
-      status("mainStatus","This GR No is already pending offline.","error");
+    if(err){
+      formStatus(err,"error");
       return;
     }
-  }
 
-  if(navigator.onLine){
-    try{
-      const res=await postToScript(p);
+    if(action==="create"){
+      const localDup=getOffline().some(x=>x.payload.schoolCode===p.schoolCode&&digitsOnly(x.payload.grNo)===p.grNo);
+      if(localDup){
+        formStatus("This GR No is already pending offline.","error");
+        return;
+      }
+    }
+
+    if(navigator.onLine){
+      let res;
+      try{
+        res=await postToScript(p);
+      }catch(ex){
+        // Do not save offline when server response is uncertain.
+        // The record may already be saved online, so saving pending can create duplicate confusion later.
+        formStatus("Server response not received. Please search this GR No before saving again. " + ex.message,"error");
+        return;
+      }
 
       if(res.success){
-        status("mainStatus",res.message||"Saved successfully.","success");
+        formStatus(res.message||"Saved successfully.","success");
         await loadDashboard();
-        showDashboard();
+        showGoDashboardButton();
         return;
       }
 
-      if(res.duplicate)throw new Error(res.message);
-
-      if(action==="create"){
-        saveOffline(p,res.message);
-        showDashboard();
+      if(res.duplicate){
+        formStatus(res.message||"This GR No already exists in the same school.","error");
         return;
       }
 
-      throw new Error(res.message||"Save failed");
-
-    }catch(ex){
-      if(action==="create"){
-        saveOffline(p,ex.message);
-        showDashboard();
-        return;
-      }
-
-      status("mainStatus",ex.message,"error");
+      formStatus(res.message||"Save failed.","error");
       return;
     }
-  }
 
-  if(action==="create"){
-    saveOffline(p,"No internet");
-    showDashboard();
-  }else{
-    status("mainStatus","Update needs internet. Please try when online.","error");
+    if(action==="create"){
+      saveOffline(p,"No internet");
+      formStatus("Internet is not available. Record saved in Pending Sync.","info");
+      showGoDashboardButton();
+    }else{
+      formStatus("Update needs internet. Please try when online.","error");
+    }
+
+  }finally{
+    saveBtn.disabled=false;
+    saveBtn.textContent=oldText;
   }
 }
 
@@ -760,7 +804,7 @@ function rotatePhoto(deg){
 
 function applyCrop(){
   if(!cropper){
-    status("mainStatus","Upload photo first.","error");
+    formStatus("Upload photo first.","error");
     return;
   }
 
@@ -776,7 +820,7 @@ function applyCrop(){
   document.getElementById("croppedPreview").classList.remove("hidden");
   document.getElementById("previewText").classList.add("hidden");
 
-  status("mainStatus","Photo cropped.","success");
+  formStatus("Photo cropped.","success");
 }
 
 /* PDF */
