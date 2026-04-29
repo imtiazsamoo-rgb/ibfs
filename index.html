@@ -685,25 +685,90 @@ function collectPayload(action){
 }
 
 function validatePayload(p){
-  const req=[
-    "schoolCode","grNo","studentName","surnameCast","gender","dob",
-    "birthPlace","religion","admitClass","currentClass",
-    "dateOfAdmission","shift","fatherName","motherName"
-  ];
 
-  for(const k of req){
-    if(!p[k])return k+" is required.";
+  if(!p.grNo){
+    focusField("grNo");
+    return "GR No is required.";
   }
 
-  if(!/^\d{13}$/.test(p.bFormNo))return "B Form No must be 13 digits.";
-  if(!/^\d{13}$/.test(p.fatherCnic))return "Father CNIC must be 13 digits.";
-  if(!/^\d{13}$/.test(p.motherCnic))return "Mother CNIC must be 13 digits.";
+  if(!p.studentName){
+    focusField("studentName");
+    return "Student Name is required.";
+  }
 
-  if(p.action==="create"&&!p.studentPhotoBase64){
-    const photoFile=document.getElementById("photoInput").files[0];
-    return photoFile
-      ? "Please click Apply Crop before submitting the form."
-      : "Photo is required. Please upload and crop the photo.";
+  if(!p.surnameCast){
+    focusField("surnameCast");
+    return "Surname is required.";
+  }
+
+  if(!/^\d{13}$/.test(p.bFormNo)){
+    focusField("bFormNo");
+    return "B Form No must be 13 digits.";
+  }
+
+  if(!p.fatherName){
+    focusField("fatherName");
+    return "Father Name required.";
+  }
+
+  if(!/^\d{13}$/.test(p.fatherCnic)){
+    focusField("fatherCnic");
+    return "Father CNIC must be 13 digits.";
+  }
+
+  if(!p.motherName){
+    focusField("motherName");
+    return "Mother Name required.";
+  }
+
+  if(!/^\d{13}$/.test(p.motherCnic)){
+    focusField("motherCnic");
+    return "Mother CNIC must be 13 digits.";
+  }
+
+  if(!p.gender){
+    focusField("gender");
+    return "Select Gender.";
+  }
+
+  if(!p.dob){
+    focusField("dob");
+    return "DOB required.";
+  }
+
+  if(!p.admitClass){
+    focusField("admitClass");
+    return "Admit class required.";
+  }
+
+  if(!p.currentClass){
+    focusField("currentClass");
+    return "Current class required.";
+  }
+
+  if(!p.religion){
+    focusField("religion");
+    return "Religion required.";
+  }
+
+  if(!p.birthPlace){
+    focusField("birthPlace");
+    return "Birth place required.";
+  }
+
+  if(!p.dateOfAdmission){
+    focusField("dateOfAdmission");
+    return "Admission date required.";
+  }
+
+  if(!p.shift){
+    focusField("shift");
+    return "Select shift.";
+  }
+
+  if(p.action==="create" && !croppedImageBase64){
+    focusField("photoInput");
+    return "Please crop photo before submit.";
   }
 
   return "";
