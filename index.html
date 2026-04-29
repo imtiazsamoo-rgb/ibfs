@@ -698,7 +698,13 @@ function validatePayload(p){
   if(!/^\d{13}$/.test(p.bFormNo))return "B Form No must be 13 digits.";
   if(!/^\d{13}$/.test(p.fatherCnic))return "Father CNIC must be 13 digits.";
   if(!/^\d{13}$/.test(p.motherCnic))return "Mother CNIC must be 13 digits.";
-  if(p.action==="create"&&!p.studentPhotoBase64)return "Photo is required.";
+
+  if(p.action==="create"&&!p.studentPhotoBase64){
+    const photoFile=document.getElementById("photoInput").files[0];
+    return photoFile
+      ? "Please click Apply Crop before submitting the form."
+      : "Photo is required. Please upload and crop the photo.";
+  }
 
   return "";
 }
@@ -743,8 +749,23 @@ async function submitForm(e){
       }
 
       if(res.success){
-        formStatus(res.message||"Saved successfully.","success");
+        const successMsg=res.message||"Admission submitted successfully.";
         await loadDashboard();
+
+        if(action==="create"){
+          resetForm();
+          document.getElementById("mode").value="create";
+          document.getElementById("formTitle").textContent="New Admission";
+          document.getElementById("saveBtn").textContent="Save Admission";
+          hide("dashboardPanel");
+          hide("searchPanel");
+          show("admissionForm");
+          formStatus(successMsg + " New admission form is ready.","success");
+          showGoDashboardButton();
+          return;
+        }
+
+        formStatus(successMsg,"success");
         showGoDashboardButton();
         return;
       }
@@ -760,7 +781,14 @@ async function submitForm(e){
 
     if(action==="create"){
       saveOffline(p,"No internet");
-      formStatus("Internet is not available. Record saved in Pending Sync.","info");
+      resetForm();
+      document.getElementById("mode").value="create";
+      document.getElementById("formTitle").textContent="New Admission";
+      document.getElementById("saveBtn").textContent="Save Admission";
+      hide("dashboardPanel");
+      hide("searchPanel");
+      show("admissionForm");
+      formStatus("Internet is not available. Record saved in Pending Sync. New admission form is ready.","info");
       showGoDashboardButton();
     }else{
       formStatus("Update needs internet. Please try when online.","error");
@@ -775,6 +803,13 @@ async function submitForm(e){
 /* PHOTO */
 document.getElementById("photoInput").addEventListener("change",async e=>{
   const file=e.target.files&&e.target.files[0];
+
+  croppedImageBase64="";
+  document.getElementById("croppedPreview").src="";
+  document.getElementById("croppedPreview").classList.add("hidden");
+  document.getElementById("previewText").classList.remove("hidden");
+  clearFormStatus();
+
   if(!file)return;
 
   const reader=new FileReader();
