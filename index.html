@@ -22,6 +22,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
 label{font-weight:bold;font-size:14px}
 input,select,button{font:inherit}
 input,select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+.field-error{border:2px solid #dc2626!important;box-shadow:0 0 0 3px rgba(220,38,38,.18)!important}
 input[readonly]{background:#f3f4f6}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .btn{border:0;border-radius:10px;padding:11px 14px;font-weight:bold;cursor:pointer}
@@ -248,6 +249,23 @@ function digitsOnly(v){return String(v||"").replace(/\D/g,"")}
 function clean(v){return String(v||"").trim()}
 function show(el){document.getElementById(el).classList.remove("hidden")}
 function hide(el){document.getElementById(el).classList.add("hidden")}
+
+function focusField(fieldId){
+  const el = document.getElementById(fieldId);
+  if(!el) return;
+
+  document.querySelectorAll(".field-error").forEach(x=>x.classList.remove("field-error"));
+
+  setTimeout(()=>{
+    el.scrollIntoView({behavior:"smooth", block:"center", inline:"nearest"});
+    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
+    el.classList.add("field-error");
+
+    setTimeout(()=>{
+      el.classList.remove("field-error");
+    },3000);
+  },80);
+}
 
 function status(id,msg,type="info"){
   const e=document.getElementById(id);
@@ -768,7 +786,7 @@ function validatePayload(p){
 
   if(p.action==="create" && !croppedImageBase64){
     focusField("photoInput");
-    return "Please crop photo before submit.";
+    return "Please click Apply Crop before submitting the form.";
   }
 
   return "";
@@ -933,23 +951,6 @@ function base64ToBlob(base64,type){
   }
 
   return new Blob([arr],{type});
-}
-function focusField(fieldId){
-  const el = document.getElementById(fieldId);
-  if(!el) return;
-
-  el.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-
-  el.focus();
-
-  el.style.border = "2px solid red";
-
-  setTimeout(()=>{
-    el.style.border = "";
-  },2000);
 }
 async function downloadSchoolPdf(){
   try{
