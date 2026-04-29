@@ -934,7 +934,23 @@ function base64ToBlob(base64,type){
 
   return new Blob([arr],{type});
 }
+function focusField(fieldId){
+  const el = document.getElementById(fieldId);
+  if(!el) return;
 
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  el.focus();
+
+  el.style.border = "2px solid red";
+
+  setTimeout(()=>{
+    el.style.border = "";
+  },2000);
+}
 async function downloadSchoolPdf(){
   try{
     status("mainStatus","Preparing PDF...","info");
