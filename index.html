@@ -179,11 +179,9 @@ th{background:#dbeafe}
 <div><label>B Form No</label><input id="bFormNo" inputmode="numeric" maxlength="13"></div>
 <div><label>Father Name</label><input id="fatherName"></div>
 
-<div><label>Father CNIC</label><input id="fatherCnic" inputmode="numeric" maxlength="13"></div>
+<div><label>Parent CNIC</label><input id="fatherCnic" inputmode="numeric" maxlength="13"></div>
 <div><label>Parent Contact Number</label><input id="parentContact" inputmode="numeric" maxlength="11"></div>
 
-<div><label>Mother Name</label><input id="motherName"></div>
-<div><label>Mother CNIC</label><input id="motherCnic" inputmode="numeric" maxlength="13"></div>
 
 <div>
 <label>Gender</label>
@@ -783,17 +781,30 @@ function fillForm(r){
   document.getElementById("saveBtn").textContent="Update Record";
   document.getElementById("schoolCode").value=loggedInSchoolCode;
 
-  const ids=[
-    "grNo","studentName","surnameCast","bFormNo",
-    "fatherName","fatherCnic","parentContact",
-    "motherName","motherCnic",
-    "gender","dob","admitClass","currentClass","status",
-    "religion","birthPlace","dateOfAdmission","shift"
-  ];
+  function val(){
+    for(let i=0;i<arguments.length;i++){
+      const k=arguments[i];
+      if(r[k]!==undefined && r[k]!==null && r[k]!=="") return r[k];
+    }
+    return "";
+  }
 
-  ids.forEach(id=>{
-    document.getElementById(id).value=r[id]||"";
-  });
+  document.getElementById("grNo").value=val("grNo","GRNo");
+  document.getElementById("studentName").value=val("studentName","StudentName");
+  document.getElementById("surnameCast").value=val("surnameCast","SurnameCast");
+  document.getElementById("bFormNo").value=val("bFormNo","BFormNo");
+  document.getElementById("fatherName").value=val("fatherName","FatherGuardianName","FatherName");
+  document.getElementById("fatherCnic").value=val("fatherCnic","ParentCNIC");
+  document.getElementById("parentContact").value=val("parentContact","ParentContact");
+  document.getElementById("gender").value=val("gender","Gender");
+  document.getElementById("dob").value=formatDateInput(val("dob","DOB"));
+  document.getElementById("admitClass").value=val("admitClass","ClassAdmitted");
+  document.getElementById("currentClass").value=val("currentClass","CurrentClass");
+  document.getElementById("status").value=val("status","Status") || "New Enrollment";
+  document.getElementById("religion").value=val("religion","Religion");
+  document.getElementById("birthPlace").value=val("birthPlace","ResidentialAddress");
+  document.getElementById("dateOfAdmission").value=formatDateInput(val("dateOfAdmission","DateOfAdmission"));
+  document.getElementById("shift").value=val("shift","Shift");
 
   document.getElementById("originalSchoolCode").value=r.schoolCode||loggedInSchoolCode;
   document.getElementById("originalGrNo").value=r.grNo||"";
@@ -824,8 +835,6 @@ function collectPayload(action){
     fatherName:clean(document.getElementById("fatherName").value),
     fatherCnic:digitsOnly(document.getElementById("fatherCnic").value),
     parentContact:digitsOnly(document.getElementById("parentContact").value),
-    motherName:clean(document.getElementById("motherName").value),
-    motherCnic:digitsOnly(document.getElementById("motherCnic").value),
     gender:document.getElementById("gender").value,
     dob:document.getElementById("dob").value,
     admitClass:document.getElementById("admitClass").value,
@@ -851,8 +860,6 @@ function validatePayload(p){
   if(!p.fatherName){focusField("fatherName");return "Father Name required.";}
   if(!/^\d{13}$/.test(p.fatherCnic)){focusField("fatherCnic");return "Father CNIC must be 13 digits.";}
   if(!/^\d{11}$/.test(p.parentContact)){focusField("parentContact");return "Parent Contact Number must be 11 digits.";}
-  if(!p.motherName){focusField("motherName");return "Mother Name required.";}
-  if(!/^\d{13}$/.test(p.motherCnic)){focusField("motherCnic");return "Mother CNIC must be 13 digits.";}
   if(!p.gender){focusField("gender");return "Select Gender.";}
   if(!p.dob){focusField("dob");return "DOB required.";}
   if(!p.admitClass){focusField("admitClass");return "Admit class required.";}
