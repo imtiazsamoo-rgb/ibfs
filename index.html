@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IBFS Lite Offline Admission</title>
+<title>IBFS Enrollment Portal</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 
@@ -18,7 +18,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#1f2937}
 .panel{padding:14px;border-bottom:1px solid #e5e7eb}
 .box{background:#f8fafc;border:1px solid #e5e7eb;border-radius:14px;padding:14px}
 .grid{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}}
+@media(min-width:760px){.grid.two{grid-template-columns:1fr 1fr}.grid.three{grid-template-columns:1fr 1fr 1fr}}
 label{font-weight:bold;font-size:14px}
 input,select,button{font:inherit}
 input,select{width:100%;padding:11px;border:1px solid #d1d5db;border-radius:10px;background:#fff}
@@ -38,15 +38,16 @@ input[readonly]{background:#f3f4f6}
 .error{background:#fee2e2;color:#991b1b}
 .hidden{display:none!important}
 .stats{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:760px){.stats{grid-template-columns:repeat(3,1fr)}}
-.stat{padding:18px;border-radius:14px;color:#fff}
-.total{background:#1d4ed8}.male{background:#16a34a}.female{background:#db2777}
-.stat .num{font-size:32px;font-weight:bold}
+@media(min-width:760px){.stats{grid-template-columns:repeat(5,1fr)}}
+.stat{padding:16px;border-radius:14px;color:#fff}
+.total{background:#1d4ed8}.male{background:#16a34a}.female{background:#db2777}.dropout{background:#dc2626}.passout{background:#6b7280}
+.stat .num{font-size:28px;font-weight:bold}
 .student-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px;display:grid;grid-template-columns:80px 1fr;gap:12px;margin-top:12px}
-@media(min-width:760px){.student-card{grid-template-columns:80px 1fr 170px}}
+@media(min-width:760px){.student-card{grid-template-columns:80px 1fr 190px}}
 .student-thumb{width:80px;height:100px;background:#e5e7eb;border-radius:10px;overflow:hidden}
 .student-thumb img{width:100%;height:100%;object-fit:cover}
 .small{font-size:14px;line-height:1.6;color:#4b5563}
+.badge{background:#e5e7eb;border-radius:999px;padding:7px 10px;font-weight:bold}
 .photo-wrap{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:760px){.photo-wrap{grid-template-columns:1fr 1fr}}
 .preview-box,.crop-box{min-height:260px;border:1px dashed #cbd5e1;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#f3f4f6}
@@ -54,7 +55,10 @@ input[readonly]{background:#f3f4f6}
 .crop-box img{max-width:100%}
 .offline-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px;margin-top:12px}
 .offline-row{border-top:1px solid #fed7aa;padding-top:8px;margin-top:8px;font-size:13px}
-.badge{background:#e5e7eb;border-radius:999px;padding:7px 10px;font-weight:bold}
+table{width:100%;border-collapse:collapse;background:#fff;margin-top:10px}
+th,td{border:1px solid #ddd;padding:8px;font-size:13px}
+th{background:#dbeafe}
+@media(max-width:520px){.btn{width:100%}.actions{display:grid;grid-template-columns:1fr}}
 </style>
 </head>
 
@@ -64,7 +68,7 @@ input[readonly]{background:#f3f4f6}
 
 <div class="header">
 <h1>Indus Bright Future School System</h1>
-<p>Lite Offline Admission 2026</p>
+<p>School Enrollment Portal</p>
 </div>
 
 <div class="panel" id="loginPanel">
@@ -86,9 +90,10 @@ input[readonly]{background:#f3f4f6}
 <div class="panel">
 <div class="actions">
 <span class="badge">School Code: <span id="loggedInSchoolLabel"></span></span>
+<button class="btn btn-primary" onclick="showDashboard()">Dashboard</button>
 <button class="btn btn-success" onclick="newAdmission()">New Admission</button>
-<button class="btn btn-primary" onclick="showSearch()">Search</button>
-<button class="btn btn-warning" onclick="downloadSchoolPdf()">Download PDF</button>
+<button class="btn btn-primary" onclick="showSearch()">Search Student</button>
+<button class="btn btn-warning" onclick="showReports()">Download PDF Reports</button>
 <button class="btn btn-secondary" onclick="syncOfflineRecords()">Sync Pending</button>
 <button class="btn btn-danger" onclick="logoutUser()">Logout</button>
 </div>
@@ -97,10 +102,14 @@ input[readonly]{background:#f3f4f6}
 
 <div class="panel" id="dashboardPanel">
 <div class="stats">
-<div class="stat total"><div>Total Students</div><div class="num" id="totalCount">0</div></div>
+<div class="stat total"><div>Enrollment</div><div class="num" id="totalCount">0</div></div>
 <div class="stat male"><div>Male</div><div class="num" id="maleCount">0</div></div>
 <div class="stat female"><div>Female</div><div class="num" id="femaleCount">0</div></div>
+<div class="stat dropout"><div>Dropout</div><div class="num" id="dropoutCount">0</div></div>
+<div class="stat passout"><div>Passout</div><div class="num" id="passoutCount">0</div></div>
 </div>
+
+<div id="classWiseBox"></div>
 
 <div class="offline-box">
 <b>Offline Pending Records: <span id="pendingCount">0</span></b>
@@ -110,15 +119,44 @@ input[readonly]{background:#f3f4f6}
 
 <div class="panel hidden" id="searchPanel">
 <div class="box">
-<h3>Search Existing Record</h3>
-<label>GR No</label>
-<input id="searchGrNo" inputmode="numeric">
+<h3>Search Student</h3>
+<div class="grid two">
+<div><label>GR No</label><input id="searchGrNo" inputmode="numeric"></div>
+</div>
 <div class="actions">
-<button class="btn btn-primary" onclick="searchRecord()">Search</button>
+<button class="btn btn-primary" onclick="searchStudents(0)">Search</button>
 <button class="btn btn-secondary" onclick="showDashboard()">Back</button>
 </div>
 <div id="searchStatus" class="small"></div>
 <div id="searchResultCard"></div>
+
+<div class="actions" id="paginationBox" style="margin-top:12px">
+<button class="btn btn-secondary" onclick="prevPage()">Previous</button>
+<button class="btn btn-primary" onclick="nextPage()">Next</button>
+</div>
+</div>
+</div>
+
+<div class="panel hidden" id="reportsPanel">
+<div class="box">
+<h3>Download PDF Report</h3>
+
+<div class="grid two">
+<div>
+<label>Select Report</label>
+<select id="reportType">
+<option value="">Select PDF Report</option>
+<option value="schoolEnrollment">School Enrollment</option>
+<option value="newAdmission">New Admission</option>
+<option value="dropoutPassout">Dropout & Passout</option>
+</select>
+</div>
+</div>
+
+<div class="actions">
+<button class="btn btn-warning" onclick="downloadSelectedPdf()">Download PDF</button>
+<button class="btn btn-secondary" onclick="showDashboard()">Back</button>
+</div>
 </div>
 </div>
 
@@ -134,11 +172,16 @@ input[readonly]{background:#f3f4f6}
 <div class="grid two">
 <div><label>School Code</label><input id="schoolCode" readonly></div>
 <div><label>GR No</label><input id="grNo" inputmode="numeric"></div>
+
 <div><label>Student Name</label><input id="studentName"></div>
 <div><label>Surname / Cast</label><input id="surnameCast"></div>
+
 <div><label>B Form No</label><input id="bFormNo" inputmode="numeric" maxlength="13"></div>
 <div><label>Father Name</label><input id="fatherName"></div>
+
 <div><label>Father CNIC</label><input id="fatherCnic" inputmode="numeric" maxlength="13"></div>
+<div><label>Parent Contact Number</label><input id="parentContact" inputmode="numeric" maxlength="11"></div>
+
 <div><label>Mother Name</label><input id="motherName"></div>
 <div><label>Mother CNIC</label><input id="motherCnic" inputmode="numeric" maxlength="13"></div>
 
@@ -172,6 +215,17 @@ input[readonly]{background:#f3f4f6}
 </div>
 
 <div>
+<label>Status</label>
+<select id="status">
+<option value="New Enrollment">New Enrollment</option>
+<option value="Promoted">Promoted</option>
+<option value="Retained">Retained</option>
+<option value="Dropout">Dropout</option>
+<option value="Passout">Passout</option>
+</select>
+</div>
+
+<div>
 <label>Religion</label>
 <select id="religion">
 <option value="">Select</option>
@@ -181,7 +235,7 @@ input[readonly]{background:#f3f4f6}
 </select>
 </div>
 
-<div><label>Birth Place</label><input id="birthPlace"></div>
+<div><label>Birth Place / Address</label><input id="birthPlace"></div>
 <div><label>Date of Admission</label><input id="dateOfAdmission" type="date"></div>
 
 <div>
@@ -239,16 +293,29 @@ input[readonly]{background:#f3f4f6}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
 <script>
-const APPS_SCRIPT_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzkja68kzTrywDKPXwlIXpLnlTqI9fGO9IaEtMqpTzfhEBwYypO-6CUArDJ7GACUE-QFg/exec";
+const APPS_SCRIPT_WEB_APP_URL = "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE";
 
 let loggedInSchoolCode = "";
+let currentUser = null;
 let cropper = null;
 let croppedImageBase64 = "";
+
+let currentPage = 0;
+const PAGE_SIZE = 10;
+let lastSearchCount = 0;
+
+const CLASS_ORDER = ["Kachi","I","II","III","IV","V","VI","VII","VIII"];
 
 function digitsOnly(v){return String(v||"").replace(/\D/g,"")}
 function clean(v){return String(v||"").trim()}
 function show(el){document.getElementById(el).classList.remove("hidden")}
 function hide(el){document.getElementById(el).classList.add("hidden")}
+
+function previousClass(cls){
+  const i = CLASS_ORDER.indexOf(cls);
+  if(i > 0) return CLASS_ORDER[i - 1];
+  return cls;
+}
 
 function focusField(fieldId){
   const el = document.getElementById(fieldId);
@@ -261,9 +328,7 @@ function focusField(fieldId){
     try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
     el.classList.add("field-error");
 
-    setTimeout(()=>{
-      el.classList.remove("field-error");
-    },3000);
+    setTimeout(()=>el.classList.remove("field-error"),3000);
   },80);
 }
 
@@ -280,26 +345,18 @@ function clearStatus(id){
   e.className="status";
 }
 
-function formStatus(msg,type="info"){
-  status("formStatus",msg,type);
-}
-
-function clearFormStatus(){
-  clearStatus("formStatus");
-}
+function formStatus(msg,type="info"){status("formStatus",msg,type)}
+function clearFormStatus(){clearStatus("formStatus")}
 
 function showGoDashboardButton(){
   document.getElementById("goDashboardBtn").classList.remove("hidden");
 }
 
 function hideGoDashboardButton(){
-  const b=document.getElementById("goDashboardBtn");
-  if(b)b.classList.add("hidden");
+  document.getElementById("goDashboardBtn").classList.add("hidden");
 }
 
-function formBack(){
-  showDashboard();
-}
+function formBack(){showDashboard()}
 
 async function postToScript(payload){
   const r = await fetch(APPS_SCRIPT_WEB_APP_URL,{
@@ -323,8 +380,10 @@ async function postToScript(payload){
 
 function photoUrl(url){
   if(!url)return "";
-  const m=String(url).match(/[?&]id=([^&]+)/)||String(url).match(/\/d\/([^/]+)/);
-  return m?`https://drive.google.com/thumbnail?id=${m[1]}&sz=w600`:url;
+  const s=String(url);
+  const m=s.match(/[?&]id=([^&]+)/)||s.match(/\/d\/([^/]+)/)||s.match(/[-\w]{25,}/);
+  const id=m?(m[1]||m[0]):"";
+  return id?`https://drive.google.com/thumbnail?id=${id}&sz=w600`:url;
 }
 
 /* OFFLINE */
@@ -341,11 +400,10 @@ function setOffline(a){
 
 function saveOffline(payload, reason){
   const arr=getOffline();
-  const statusTarget = document.getElementById("admissionForm") && !document.getElementById("admissionForm").classList.contains("hidden") ? "formStatus" : "mainStatus";
   const key=payload.schoolCode+"-"+payload.grNo;
 
   if(arr.some(x=>x.key===key)){
-    status(statusTarget,"This GR No is already pending offline.","error");
+    formStatus("This GR No is already pending offline.","error");
     return;
   }
 
@@ -358,7 +416,7 @@ function saveOffline(payload, reason){
   });
 
   setOffline(arr);
-  status(statusTarget,"Internet slow/offline. Record saved in Pending Sync.","info");
+  formStatus("Internet slow/offline. Record saved in Pending Sync.","info");
 }
 
 function renderOffline(){
@@ -405,7 +463,6 @@ async function syncOfflineRecords(){
 
       if(!res.success){
         if(res.duplicate){
-          // Already exists online; remove from pending to avoid repeated duplicate sync.
           continue;
         }
         item.status="failed";
@@ -449,7 +506,8 @@ async function loginUser(){
 
     if(!res.success)throw new Error(res.message||"Login failed");
 
-    loggedInSchoolCode=clean(res.schoolCode);
+    currentUser=res.user||res;
+    loggedInSchoolCode=clean(res.schoolCode || currentUser.schoolCode);
 
     document.getElementById("loggedInSchoolLabel").textContent=loggedInSchoolCode;
     document.getElementById("schoolCode").value=loggedInSchoolCode;
@@ -465,7 +523,38 @@ async function loginUser(){
   }
 }
 
-function logoutUser(){location.reload()}
+function logoutUser(){
+  localStorage.removeItem(offlineKey());
+  location.reload();
+}
+
+/* NAVIGATION */
+function hideAll(){
+  hide("dashboardPanel");
+  hide("searchPanel");
+  hide("reportsPanel");
+  hide("admissionForm");
+}
+
+async function showDashboard(){
+  hideAll();
+  show("dashboardPanel");
+  clearStatus("mainStatus");
+  await loadDashboard();
+  renderOffline();
+}
+
+function showSearch(){
+  hideAll();
+  show("searchPanel");
+  document.getElementById("searchResultCard").innerHTML="";
+  document.getElementById("searchStatus").textContent="";
+}
+
+function showReports(){
+  hideAll();
+  show("reportsPanel");
+}
 
 /* DASHBOARD */
 async function loadDashboard(){
@@ -474,9 +563,22 @@ async function loadDashboard(){
 
     if(!res.success)throw new Error(res.message||"Dashboard failed");
 
-    document.getElementById("totalCount").textContent=res.total||0;
+    document.getElementById("totalCount").textContent=res.totalEnrollment||res.total||0;
     document.getElementById("maleCount").textContent=res.male||0;
     document.getElementById("femaleCount").textContent=res.female||0;
+    document.getElementById("dropoutCount").textContent=res.dropout||0;
+    document.getElementById("passoutCount").textContent=res.passout||0;
+
+    let html="";
+    if(res.classWise){
+      html="<h3>Class-wise Enrollment</h3><table><tr><th>Class</th><th>Male</th><th>Female</th><th>Total</th></tr>";
+      Object.keys(res.classWise).forEach(cls=>{
+        const x=res.classWise[cls];
+        html+=`<tr><td>${cls}</td><td>${x.male||0}</td><td>${x.female||0}</td><td>${x.total||0}</td></tr>`;
+      });
+      html+="</table>";
+    }
+    document.getElementById("classWiseBox").innerHTML=html;
 
   }catch(e){
     status("mainStatus",e.message,"error");
@@ -485,100 +587,116 @@ async function loadDashboard(){
   renderOffline();
 }
 
-function showDashboard(){
-  show("dashboardPanel");
-  hide("searchPanel");
-  hide("admissionForm");
-  clearStatus("mainStatus");
-  renderOffline();
-}
+/* SEARCH */
+async function searchStudents(page=0){
+  currentPage = page;
 
-function showSearch(){
-  hide("dashboardPanel");
-  show("searchPanel");
-  hide("admissionForm");
-  document.getElementById("searchResultCard").innerHTML="";
-  document.getElementById("searchStatus").textContent="";
-}
-
-function newAdmission(){
-  resetForm();
-  clearStatus("mainStatus");
-  clearFormStatus();
-  hideGoDashboardButton();
-  document.getElementById("mode").value="create";
-  document.getElementById("formTitle").textContent="New Admission";
-  document.getElementById("saveBtn").textContent="Save Admission";
-  hide("dashboardPanel");
-  hide("searchPanel");
-  show("admissionForm");
-}
-
-/* SEARCH CARD */
-async function searchRecord(){
   const grNo=digitsOnly(document.getElementById("searchGrNo").value);
-  const card=document.getElementById("searchResultCard");
-  const msg=document.getElementById("searchStatus");
 
-  card.innerHTML="";
+  document.getElementById("searchResultCard").innerHTML="";
+  document.getElementById("searchStatus").textContent="Searching...";
 
   if(!grNo){
-    msg.textContent="Enter GR No";
+    document.getElementById("searchStatus").textContent="Enter GR No.";
     return;
   }
-
-  msg.textContent="Searching...";
 
   try{
     let res=null;
 
     if(navigator.onLine){
       try{
-        res=await postToScript({action:"search",schoolCode:loggedInSchoolCode,grNo});
+        res=await postToScript({
+          action:"searchstudents",
+          schoolCode:loggedInSchoolCode,
+          grNo,
+          limit:PAGE_SIZE,
+          offset:currentPage * PAGE_SIZE
+        });
       }catch(e){}
     }
 
-    if(!res||!res.success){
-      const found=getOffline().find(x=>digitsOnly(x.payload.grNo)===grNo);
-      if(found)res={success:true,record:found.payload,offline:true};
+    if(!res || !res.success){
+      const found=getOffline().filter(x=>digitsOnly(x.payload.grNo)===grNo);
+      const cards=found.map(x=>({
+        grNo:x.payload.grNo,
+        name:x.payload.studentName,
+        father:x.payload.fatherName,
+        currentClass:x.payload.currentClass,
+        status:"Offline Pending",
+        photo:x.payload.studentPhotoBase64,
+        offline:true
+      }));
+      res={success:true,students:cards,totalMatched:cards.length};
     }
 
-    if(!res||!res.success)throw new Error((res&&res.message)||"No data found");
+    if(!res.success)throw new Error(res.message||"Search failed");
 
-    renderSearchCard(res.record,!!res.offline);
-    msg.textContent="";
+    renderCards(res.students||[]);
+
+    lastSearchCount = (res.students||[]).length;
+
+    if(lastSearchCount){
+      document.getElementById("searchStatus").textContent =
+        "Showing "+((currentPage*PAGE_SIZE)+1)+" to "+
+        ((currentPage*PAGE_SIZE)+lastSearchCount);
+    }else{
+      document.getElementById("searchStatus").textContent="No student found.";
+    }
 
   }catch(e){
-    msg.textContent=e.message;
+    document.getElementById("searchStatus").textContent=e.message;
   }
+}
+
+function renderCards(students){
+  const box=document.getElementById("searchResultCard");
+  box.innerHTML="";
+
+  if(!students.length){
+    box.innerHTML="<div class='small'>No student found.</div>";
+    return;
+  }
+
+  students.forEach(s=>{
+    const img=s.offline ? s.photo : photoUrl(s.photo);
+    const safeGr=safeAttr(s.grNo);
+
+    box.innerHTML+=`
+      <div class="student-card">
+        <div class="student-thumb">${img?`<img src="${img}">`:""}</div>
+        <div>
+          <b>${s.name||""}</b>
+          <div class="small">
+            Father: ${s.father||""}<br>
+            GR No: ${s.grNo||""}<br>
+            Class: ${s.currentClass||""}<br>
+            Status: ${s.status||""}
+          </div>
+        </div>
+        <div class="actions" style="margin-top:0">
+          <button class="btn btn-primary" onclick="openEdit('${safeGr}',${!!s.offline})">Manage</button>
+          <button class="btn btn-danger" onclick="deleteRecord('${safeGr}',${!!s.offline})">Delete</button>
+        </div>
+      </div>`;
+  });
+}
+
+function nextPage(){
+  if(lastSearchCount < PAGE_SIZE) return;
+  searchStudents(currentPage + 1);
+}
+
+function prevPage(){
+  if(currentPage <= 0) return;
+  searchStudents(currentPage - 1);
 }
 
 function safeAttr(v){
   return String(v||"").replace(/'/g,"&#39;").replace(/"/g,"&quot;");
 }
 
-function renderSearchCard(r,isOffline){
-  const img=r.studentPhotoBase64||photoUrl(r.studentPhoto||r.existingPhotoUrl);
-
-  document.getElementById("searchResultCard").innerHTML=`
-    <div class="student-card">
-      <div class="student-thumb">${img?`<img src="${img}">`:""}</div>
-      <div>
-        <b>${r.studentName||""}</b>
-        <div class="small">
-          Father: ${r.fatherName||""}<br>
-          GR No: ${r.grNo||""}<br>
-          Class: ${r.currentClass||""}<br>
-          ${isOffline?"Status: Offline Pending":""}
-        </div>
-      </div>
-      <div class="actions" style="margin-top:0">
-        <button class="btn btn-primary" onclick="openEdit('${safeAttr(r.grNo)}',${isOffline})">Manage</button>
-        <button class="btn btn-danger" onclick="deleteRecord('${safeAttr(r.grNo)}',${isOffline})">Delete</button>
-      </div>
-    </div>`;
-}
-
+/* EDIT / DELETE */
 async function openEdit(grNo,isOffline){
   try{
     let rec=null;
@@ -588,7 +706,7 @@ async function openEdit(grNo,isOffline){
       if(f)rec=f.payload;
     }else{
       const res=await postToScript({action:"search",schoolCode:loggedInSchoolCode,grNo});
-      if(!res.success)throw new Error(res.message);
+      if(!res.success)throw new Error(res.message||"Record not found");
       rec=res.record;
     }
 
@@ -620,6 +738,20 @@ async function deleteRecord(grNo,isOffline){
 }
 
 /* FORM */
+function newAdmission(){
+  resetForm();
+  clearStatus("mainStatus");
+  clearFormStatus();
+  hideGoDashboardButton();
+
+  document.getElementById("mode").value="create";
+  document.getElementById("formTitle").textContent="New Admission";
+  document.getElementById("saveBtn").textContent="Save Admission";
+
+  hideAll();
+  show("admissionForm");
+}
+
 function resetForm(){
   clearFormStatus();
   document.getElementById("admissionForm").reset();
@@ -653,8 +785,9 @@ function fillForm(r){
 
   const ids=[
     "grNo","studentName","surnameCast","bFormNo",
-    "fatherName","fatherCnic","motherName","motherCnic",
-    "gender","dob","admitClass","currentClass",
+    "fatherName","fatherCnic","parentContact",
+    "motherName","motherCnic",
+    "gender","dob","admitClass","currentClass","status",
     "religion","birthPlace","dateOfAdmission","shift"
   ];
 
@@ -666,12 +799,17 @@ function fillForm(r){
   document.getElementById("originalGrNo").value=r.grNo||"";
   document.getElementById("existingPhotoUrl").value=r.studentPhoto||r.existingPhotoUrl||"";
 
+  const img=photoUrl(r.studentPhoto||r.existingPhotoUrl||"");
+  if(img){
+    document.getElementById("croppedPreview").src=img;
+    document.getElementById("croppedPreview").classList.remove("hidden");
+    document.getElementById("previewText").classList.add("hidden");
+  }
+
   croppedImageBase64="";
-  clearFormStatus();
   hideGoDashboardButton();
 
-  hide("dashboardPanel");
-  hide("searchPanel");
+  hideAll();
   show("admissionForm");
 }
 
@@ -685,12 +823,14 @@ function collectPayload(action){
     bFormNo:digitsOnly(document.getElementById("bFormNo").value),
     fatherName:clean(document.getElementById("fatherName").value),
     fatherCnic:digitsOnly(document.getElementById("fatherCnic").value),
+    parentContact:digitsOnly(document.getElementById("parentContact").value),
     motherName:clean(document.getElementById("motherName").value),
     motherCnic:digitsOnly(document.getElementById("motherCnic").value),
     gender:document.getElementById("gender").value,
     dob:document.getElementById("dob").value,
     admitClass:document.getElementById("admitClass").value,
     currentClass:document.getElementById("currentClass").value,
+    status:document.getElementById("status").value,
     religion:document.getElementById("religion").value,
     birthPlace:clean(document.getElementById("birthPlace").value),
     dateOfAdmission:document.getElementById("dateOfAdmission").value,
@@ -698,91 +838,30 @@ function collectPayload(action){
     studentPhotoBase64:croppedImageBase64,
     existingPhotoUrl:document.getElementById("existingPhotoUrl").value,
     originalSchoolCode:document.getElementById("originalSchoolCode").value,
-    originalGrNo:document.getElementById("originalGrNo").value
+    originalGrNo:document.getElementById("originalGrNo").value,
+    updatedBy:currentUser && currentUser.username ? currentUser.username : ""
   };
 }
 
 function validatePayload(p){
-
-  if(!p.grNo){
-    focusField("grNo");
-    return "GR No is required.";
-  }
-
-  if(!p.studentName){
-    focusField("studentName");
-    return "Student Name is required.";
-  }
-
-  if(!p.surnameCast){
-    focusField("surnameCast");
-    return "Surname is required.";
-  }
-
-  if(!/^\d{13}$/.test(p.bFormNo)){
-    focusField("bFormNo");
-    return "B Form No must be 13 digits.";
-  }
-
-  if(!p.fatherName){
-    focusField("fatherName");
-    return "Father Name required.";
-  }
-
-  if(!/^\d{13}$/.test(p.fatherCnic)){
-    focusField("fatherCnic");
-    return "Father CNIC must be 13 digits.";
-  }
-
-  if(!p.motherName){
-    focusField("motherName");
-    return "Mother Name required.";
-  }
-
-  if(!/^\d{13}$/.test(p.motherCnic)){
-    focusField("motherCnic");
-    return "Mother CNIC must be 13 digits.";
-  }
-
-  if(!p.gender){
-    focusField("gender");
-    return "Select Gender.";
-  }
-
-  if(!p.dob){
-    focusField("dob");
-    return "DOB required.";
-  }
-
-  if(!p.admitClass){
-    focusField("admitClass");
-    return "Admit class required.";
-  }
-
-  if(!p.currentClass){
-    focusField("currentClass");
-    return "Current class required.";
-  }
-
-  if(!p.religion){
-    focusField("religion");
-    return "Religion required.";
-  }
-
-  if(!p.birthPlace){
-    focusField("birthPlace");
-    return "Birth place required.";
-  }
-
-  if(!p.dateOfAdmission){
-    focusField("dateOfAdmission");
-    return "Admission date required.";
-  }
-
-  if(!p.shift){
-    focusField("shift");
-    return "Select shift.";
-  }
+  if(!p.grNo){focusField("grNo");return "GR No is required.";}
+  if(!p.studentName){focusField("studentName");return "Student Name is required.";}
+  if(!p.surnameCast){focusField("surnameCast");return "Surname is required.";}
+  if(!/^\d{13}$/.test(p.bFormNo)){focusField("bFormNo");return "B Form No must be 13 digits.";}
+  if(!p.fatherName){focusField("fatherName");return "Father Name required.";}
+  if(!/^\d{13}$/.test(p.fatherCnic)){focusField("fatherCnic");return "Father CNIC must be 13 digits.";}
+  if(!/^\d{11}$/.test(p.parentContact)){focusField("parentContact");return "Parent Contact Number must be 11 digits.";}
+  if(!p.motherName){focusField("motherName");return "Mother Name required.";}
+  if(!/^\d{13}$/.test(p.motherCnic)){focusField("motherCnic");return "Mother CNIC must be 13 digits.";}
+  if(!p.gender){focusField("gender");return "Select Gender.";}
+  if(!p.dob){focusField("dob");return "DOB required.";}
+  if(!p.admitClass){focusField("admitClass");return "Admit class required.";}
+  if(!p.currentClass){focusField("currentClass");return "Current class required.";}
+  if(!p.status){focusField("status");return "Select status.";}
+  if(!p.religion){focusField("religion");return "Religion required.";}
+  if(!p.birthPlace){focusField("birthPlace");return "Birth place/address required.";}
+  if(!p.dateOfAdmission){focusField("dateOfAdmission");return "Admission date required.";}
+  if(!p.shift){focusField("shift");return "Select shift.";}
 
   if(p.action==="create" && !croppedImageBase64){
     focusField("photoInput");
@@ -825,8 +904,6 @@ async function submitForm(e){
       try{
         res=await postToScript(p);
       }catch(ex){
-        // Do not save offline when server response is uncertain.
-        // The record may already be saved online, so saving pending can create duplicate confusion later.
         formStatus("Server response not received. Please search this GR No before saving again. " + ex.message,"error");
         return;
       }
@@ -840,8 +917,7 @@ async function submitForm(e){
           document.getElementById("mode").value="create";
           document.getElementById("formTitle").textContent="New Admission";
           document.getElementById("saveBtn").textContent="Save Admission";
-          hide("dashboardPanel");
-          hide("searchPanel");
+          hideAll();
           show("admissionForm");
           formStatus(successMsg + " New admission form is ready.","success");
           showGoDashboardButton();
@@ -868,8 +944,7 @@ async function submitForm(e){
       document.getElementById("mode").value="create";
       document.getElementById("formTitle").textContent="New Admission";
       document.getElementById("saveBtn").textContent="Save Admission";
-      hide("dashboardPanel");
-      hide("searchPanel");
+      hideAll();
       show("admissionForm");
       formStatus("Internet is not available. Record saved in Pending Sync. New admission form is ready.","info");
       showGoDashboardButton();
@@ -882,6 +957,25 @@ async function submitForm(e){
     saveBtn.textContent=oldText;
   }
 }
+
+/* STATUS RULE */
+document.getElementById("status").addEventListener("change", function(){
+  const statusValue = this.value;
+  const currentClassEl = document.getElementById("currentClass");
+  const cls = currentClassEl.value;
+
+  if(statusValue === "Promoted"){
+    currentClassEl.value = cls;
+  }
+
+  if(statusValue === "Retained"){
+    currentClassEl.value = previousClass(cls);
+  }
+
+  if(statusValue === "Dropout" || statusValue === "Passout"){
+    currentClassEl.value = cls;
+  }
+});
 
 /* PHOTO */
 document.getElementById("photoInput").addEventListener("change",async e=>{
@@ -952,12 +1046,21 @@ function base64ToBlob(base64,type){
 
   return new Blob([arr],{type});
 }
-async function downloadSchoolPdf(){
+
+async function downloadSelectedPdf(){
+  const type = document.getElementById("reportType").value;
+
+  if(!type){
+    status("mainStatus","Please select report type.","error");
+    return;
+  }
+
   try{
     status("mainStatus","Preparing PDF...","info");
 
     const res=await postToScript({
       action:"downloadpdf",
+      reportType:type,
       schoolCode:loggedInSchoolCode
     });
 
@@ -966,14 +1069,12 @@ async function downloadSchoolPdf(){
 
     const blob=base64ToBlob(res.pdfBase64,"application/pdf");
     const url=URL.createObjectURL(blob);
-
     const a=document.createElement("a");
     a.href=url;
-    a.download=res.fileName||"students.pdf";
+    a.download=res.fileName||"report.pdf";
     document.body.appendChild(a);
     a.click();
     a.remove();
-
     setTimeout(()=>URL.revokeObjectURL(url),1000);
 
     status("mainStatus","PDF downloaded.","success");
